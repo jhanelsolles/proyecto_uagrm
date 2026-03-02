@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/models/career.dart';
 import 'package:inscripcion_frontend/providers/registration_provider.dart';
+import 'package:inscripcion_frontend/widgets/web_layout.dart';
 
 class CareerSelectionScreen extends StatefulWidget {
   const CareerSelectionScreen({super.key});
@@ -13,7 +15,6 @@ class CareerSelectionScreen extends StatefulWidget {
 }
 
 class _CareerSelectionScreenState extends State<CareerSelectionScreen> {
-  // Query para obtener registros asociados (carreras)
   final String getCareersQuery = """
     query GetCarreras(\$registro: String!) {
       misCarreras(registro: \$registro) {
@@ -30,32 +31,44 @@ class _CareerSelectionScreenState extends State<CareerSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<RegistrationProvider>();
-    
+
     return Scaffold(
+      backgroundColor: kIsWeb ? const Color(0xFFF4F6F9) : Colors.white,
       appBar: AppBar(
-        title: Column(
-          children: [
-            const Icon(Icons.school, size: 28),
-            const SizedBox(height: 4),
-            Text(
-              'Gestión de Inscripción',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70),
-            ),
-          ],
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
-          child: Container(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Text(
-              'SELECCIONE CARRERA',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+        title: kIsWeb
+            ? const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.school, size: 20),
+                  SizedBox(width: 8),
+                  Text('Gestión de Inscripción — UAGRM'),
+                ],
+              )
+            : Column(
+                children: [
+                  const Icon(Icons.school, size: 28),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Gestión de Inscripción',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70),
                   ),
-            ),
-          ),
-        ),
+                ],
+              ),
+        bottom: kIsWeb
+            ? null
+            : PreferredSize(
+                preferredSize: const Size.fromHeight(60),
+                child: Container(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    'SELECCIONE CARRERA',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ),
       ),
       body: Query(
         options: QueryOptions(
@@ -71,11 +84,9 @@ class _CareerSelectionScreenState extends State<CareerSelectionScreen> {
                 children: [
                   const Icon(Icons.error_outline, color: Colors.red, size: 48),
                   const SizedBox(height: 16),
-                  Text('Error al cargar carreras: \n${result.exception.toString()}'),
-                  ElevatedButton(
-                    onPressed: refetch,
-                    child: const Text('Reintentar'),
-                  ),
+                  Text('Error al cargar carreras:\n${result.exception.toString()}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(onPressed: refetch, child: const Text('Reintentar')),
                 ],
               ),
             );
@@ -87,12 +98,56 @@ class _CareerSelectionScreenState extends State<CareerSelectionScreen> {
 
           final List carrerasData = result.data?['misCarreras'] ?? [];
 
+          if (kIsWeb) {
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Seleccionar Carrera',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: UAGRMTheme.textDark,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Tienes ${carrerasData.length} carrera(s) registrada(s). Elige una para continuar.',
+                            style: const TextStyle(fontSize: 13, color: UAGRMTheme.textGrey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        itemCount: carrerasData.length,
+                        itemBuilder: (context, index) {
+                          final career = Career.fromJson(carrerasData[index]['carrera']);
+                          return _CareerCard(career: career);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // Móvil: lista original
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: carrerasData.length,
             itemBuilder: (context, index) {
-              final item = carrerasData[index];
-              final career = Career.fromJson(item['carrera']);
+              final career = Career.fromJson(carrerasData[index]['carrera']);
               return _CareerCard(career: career);
             },
           );
@@ -115,72 +170,72 @@ class _CareerCard extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         context.read<RegistrationProvider>().selectCareer(career);
-        // Pequeño delay para mostrar la animación de selección
-        await Future.delayed(const Duration(milliseconds: 300));
-        // Navegar al panel principal
+        await Future.delayed(const Duration(milliseconds: 200));
         if (context.mounted) {
-           Navigator.pushReplacementNamed(context, '/panel');
+          Navigator.pushReplacementNamed(context, '/panel');
         }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: EdgeInsets.only(bottom: kIsWeb ? 10 : 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(kIsWeb ? 8 : 12),
           border: isSelected
               ? Border.all(color: UAGRMTheme.primaryBlue, width: 2)
-              : Border.all(color: Colors.transparent),
+              : Border.all(color: kIsWeb ? Colors.grey.shade200 : Colors.transparent),
           boxShadow: [
             BoxShadow(
-              color: isSelected ? UAGRMTheme.primaryBlue.withOpacity(0.3) : Colors.black12,
+              color: isSelected ? UAGRMTheme.primaryBlue.withOpacity(0.2) : Colors.black.withOpacity(0.05),
               blurRadius: isSelected ? 8 : 4,
-              offset: const Offset(0, 4),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(kIsWeb ? 14 : 20),
         child: Row(
           children: [
-             Container(
-              width: 56,
-              height: 56,
+            Container(
+              width: kIsWeb ? 40 : 56,
+              height: kIsWeb ? 40 : 56,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Colors.grey[100],
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.book, // Icono genérico por ahora
+                Icons.book,
                 color: UAGRMTheme.primaryBlue,
-                size: 30,
+                size: kIsWeb ? 22 : 30,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: kIsWeb ? 12 : 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     career.name,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: kIsWeb ? 14 : 16,
                       fontWeight: FontWeight.bold,
                       color: UAGRMTheme.textDark,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     career.faculty,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: TextStyle(
+                      fontSize: kIsWeb ? 12 : 14,
                       color: UAGRMTheme.textGrey,
                     ),
                   ),
                 ],
               ),
             ),
-             if (isSelected)
-              const Icon(Icons.check_circle, color: UAGRMTheme.successGreen, size: 28),
+            if (isSelected)
+              const Icon(Icons.check_circle, color: UAGRMTheme.successGreen, size: 22)
+            else
+              const Icon(Icons.chevron_right, color: UAGRMTheme.textGrey, size: 18),
           ],
         ),
       ),

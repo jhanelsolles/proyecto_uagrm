@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -7,6 +8,7 @@ import 'package:inscripcion_frontend/models/student.dart';
 import 'package:inscripcion_frontend/providers/registration_provider.dart';
 import 'package:inscripcion_frontend/widgets/student_info_header.dart';
 import 'package:inscripcion_frontend/widgets/option_button.dart';
+import 'package:inscripcion_frontend/widgets/web_layout.dart';
 
 class MainPanelScreen extends StatefulWidget {
   const MainPanelScreen({super.key});
@@ -19,11 +21,10 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
   @override
   void initState() {
     super.initState();
-    // Configurar barra de estado para esta pantalla
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light, // Iconos claros para fondo azul
+        statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
       ),
     );
@@ -55,33 +56,9 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
     }
   """;
 
-  void _navigateToSubjects(BuildContext context) {
-    Navigator.pushNamed(context, '/enabled-subjects');
-  }
-
-  void _navigateToSlip(BuildContext context) {
-    Navigator.pushNamed(context, '/enrollment-slip');
-  }
-
-  void _navigateToBlocks(BuildContext context) {
-    Navigator.pushNamed(context, '/blocked-status');
-  }
-
-  void _showComingSoon(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: const Text('Esta funcionalidad estará disponible próximamente.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
-    );
-  }
+  void _navigateToSubjects(BuildContext context) => Navigator.pushNamed(context, '/enabled-subjects');
+  void _navigateToSlip(BuildContext context) => Navigator.pushNamed(context, '/enrollment-slip');
+  void _navigateToBlocks(BuildContext context) => Navigator.pushNamed(context, '/blocked-status');
 
   @override
   Widget build(BuildContext context) {
@@ -89,12 +66,11 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
     final studentRegister = provider.studentRegister;
 
     if (studentRegister == null) {
-      return const Scaffold(
-        body: Center(child: Text('No se ha proporcionado un registro.')),
-      );
+      return const Scaffold(body: Center(child: Text('No se ha proporcionado un registro.')));
     }
 
     return Scaffold(
+      backgroundColor: kIsWeb ? const Color(0xFFF4F6F9) : Colors.white,
       body: SafeArea(
         child: Query(
           options: QueryOptions(
@@ -107,7 +83,7 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
           ),
           builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
             if (result.hasException) {
-               return Center(
+              return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
@@ -116,14 +92,11 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
                       const Icon(Icons.error_outline, color: UAGRMTheme.errorRed, size: 48),
                       const SizedBox(height: 16),
                       Text(
-                        'Error al cargar panel: \n${result.exception.toString()}',
+                        'Error al cargar panel:\n${result.exception.toString()}',
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: refetch,
-                        child: const Text('Reintentar'),
-                      ),
+                      ElevatedButton(onPressed: refetch, child: const Text('Reintentar')),
                       const SizedBox(height: 16),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
@@ -141,7 +114,7 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
 
             final data = result.data?['panelEstudiante'];
             if (data == null) {
-               return const Center(child: Text('No se encontraron datos para este estudiante.'));
+              return const Center(child: Text('No se encontraron datos para este estudiante.'));
             }
 
             final student = Student.fromJson(data);
@@ -151,58 +124,14 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
 
             return Column(
               children: [
-                // Header Fijo
+                // Header (compacto en web, expandido en móvil)
                 StudentInfoHeader(student: student),
 
-                // Grid scrollable
+                // Contenido del panel
                 Expanded(
-                  child: GridView.count(
-                    padding: const EdgeInsets.all(16),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.1,
-                    children: [
-                      OptionButton(
-                        icon: Icons.calendar_month,
-                        title: 'Fechas de Inscripción',
-                        isAvailable: options.inscriptionDates,
-                        onTap: () => Navigator.pushNamed(context, '/enrollment-dates'),
-                      ),
-                      OptionButton(
-                        icon: Icons.lock_outline,
-                        title: 'Bloqueo',
-                        isAvailable: true,
-                        hasBadge: options.blocked,
-                        badgeText: '!',
-                        onTap: () => _navigateToBlocks(context),
-                      ),
-                      OptionButton(
-                        icon: Icons.book_outlined,
-                        title: 'Materias habilitadas',
-                        isAvailable: options.enabledSubjects,
-                        onTap: () => _navigateToSubjects(context),
-                      ),
-                      OptionButton(
-                        icon: Icons.description_outlined,
-                        title: 'Boleta',
-                        isAvailable: true,
-                        onTap: () => _navigateToSlip(context),
-                      ),
-                      OptionButton(
-                        icon: Icons.app_registration,
-                        title: 'Inscripción',
-                        isAvailable: options.enrollment,
-                        onTap: () => Navigator.pushNamed(context, '/enrollment'),
-                      ),
-                      OptionButton(
-                        icon: Icons.info_outline,
-                        title: 'No disponible',
-                        isAvailable: false,
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
+                  child: kIsWeb
+                      ? _buildWebGrid(context, options)
+                      : _buildMobileGrid(context, options),
                 ),
               ],
             );
@@ -210,5 +139,116 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
         ),
       ),
     );
+  }
+
+  // ─── GRID WEB: 3 columnas, tarjetas compactas, centrado ──────────────────────
+
+  Widget _buildWebGrid(BuildContext context, PanelOptions options) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Título de sección
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 18,
+                    margin: const EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                      color: UAGRMTheme.primaryBlue,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const Text(
+                    'Gestión Académica',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: UAGRMTheme.textDark,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            WebCenteredLayout(
+              maxWidth: 900,
+              child: GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 3,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.6,
+                children: _buildOptionButtons(context, options),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── GRID MÓVIL: 2 columnas, original ────────────────────────────────────────
+
+  Widget _buildMobileGrid(BuildContext context, PanelOptions options) {
+    return GridView.count(
+      padding: const EdgeInsets.all(16),
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 1.1,
+      children: _buildOptionButtons(context, options),
+    );
+  }
+
+  // ─── OPCIONES COMPARTIDAS ─────────────────────────────────────────────────────
+
+  List<Widget> _buildOptionButtons(BuildContext context, PanelOptions options) {
+    return [
+      OptionButton(
+        icon: Icons.calendar_month,
+        title: 'Fechas de Inscripción',
+        isAvailable: options.inscriptionDates,
+        onTap: () => Navigator.pushNamed(context, '/enrollment-dates'),
+      ),
+      OptionButton(
+        icon: Icons.lock_outline,
+        title: 'Bloqueo',
+        isAvailable: true,
+        hasBadge: options.blocked,
+        badgeText: '!',
+        onTap: () => _navigateToBlocks(context),
+      ),
+      OptionButton(
+        icon: Icons.book_outlined,
+        title: 'Materias Habilitadas',
+        isAvailable: options.enabledSubjects,
+        onTap: () => _navigateToSubjects(context),
+      ),
+      OptionButton(
+        icon: Icons.description_outlined,
+        title: 'Boleta',
+        isAvailable: true,
+        onTap: () => _navigateToSlip(context),
+      ),
+      OptionButton(
+        icon: Icons.app_registration,
+        title: 'Inscripción',
+        isAvailable: options.enrollment,
+        onTap: () => Navigator.pushNamed(context, '/enrollment'),
+      ),
+      OptionButton(
+        icon: Icons.info_outline,
+        title: 'No disponible',
+        isAvailable: false,
+        onTap: () {},
+      ),
+    ];
   }
 }

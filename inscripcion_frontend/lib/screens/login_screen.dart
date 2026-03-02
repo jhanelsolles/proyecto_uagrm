@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
@@ -33,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      
+
       try {
         final client = GraphQLProvider.of(context).value;
         final QueryResult result = await client.query(
@@ -55,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
 
         final List carrerasData = result.data?['misCarreras'] ?? [];
-        
+
         if (carrerasData.isEmpty) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -71,13 +72,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (mounted) {
           if (carrerasData.length == 1) {
-            // Solo una carrera: seleccionar y saltar a panel
             final data = carrerasData[0]['carrera'];
             final career = Career.fromJson(data);
             provider.selectCareer(career);
             Navigator.pushReplacementNamed(context, '/panel');
           } else {
-            // Múltiples carreras: ir a selección
             Navigator.pushReplacementNamed(context, '/career');
           }
         }
@@ -95,6 +94,120 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) return _buildWebLayout();
+    return _buildMobileLayout();
+  }
+
+  // ─── LAYOUT WEB (2 columnas) ─────────────────────────────────────────────────
+
+  Widget _buildWebLayout() {
+    return Scaffold(
+      body: Row(
+        children: [
+          // Columna izquierda: branding
+          Expanded(
+            flex: 5,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1565C0), Color(0xFF1E88E5), Color(0xFF42A5F5)],
+                ),
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(48),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: const Icon(Icons.school, size: 48, color: UAGRMTheme.primaryBlue),
+                      ),
+                      const SizedBox(height: 32),
+                      const Text(
+                        'Universidad Autónoma\nGabriel René Moreno',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: 48,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: Colors.white54,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Sistema de Gestión de Inscripción\nAcadémica en línea',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+                      _buildFeatureItem(Icons.check_circle_outline, 'Inscripción en línea'),
+                      const SizedBox(height: 12),
+                      _buildFeatureItem(Icons.calendar_month_outlined, 'Consulta de fechas'),
+                      const SizedBox(height: 12),
+                      _buildFeatureItem(Icons.description_outlined, 'Boleta digital'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Columna derecha: formulario
+          Expanded(
+            flex: 4,
+            child: Container(
+              color: const Color(0xFFF4F6F9),
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 40),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: _buildLoginCard(isWeb: true),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white70, size: 18),
+        const SizedBox(width: 10),
+        Text(text, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+      ],
+    );
+  }
+
+  // ─── LAYOUT MÓVIL (original) ─────────────────────────────────────────────────
+
+  Widget _buildMobileLayout() {
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -113,7 +226,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo
                     Container(
                       width: 100,
                       height: 100,
@@ -121,90 +233,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Icon(
-                        Icons.school,
-                        size: 60,
-                        color: UAGRMTheme.primaryBlue,
-                      ),
+                      child: const Icon(Icons.school, size: 60, color: UAGRMTheme.primaryBlue),
                     ),
                     const SizedBox(height: 24),
-                    
-                    // Title
                     const Text(
                       'Gestión de Inscripción',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'UAGRM',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
+                    const Text('UAGRM', style: TextStyle(color: Colors.white70, fontSize: 16)),
                     const SizedBox(height: 48),
-                    
-                    // Registration Input
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            'Registro Universitario',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: UAGRMTheme.textDark,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _registroController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              hintText: 'Ej: 218001234',
-                              prefixIcon: Icon(Icons.badge),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Ingrese su registro universitario';
-                              }
-                              if (value.length < 6) {
-                                return 'Registro inválido';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: _isLoading ? null : _handleLogin,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            child: _isLoading 
-                              ? const SizedBox(
-                                  height: 20, 
-                                  width: 20, 
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
-                                )
-                              : const Text(
-                                  'Ingresar',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildLoginCard(isWeb: false),
                   ],
                 ),
               ),
@@ -212,6 +252,125 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // ─── FORMULARIO COMPARTIDO ────────────────────────────────────────────────────
+
+  Widget _buildLoginCard({required bool isWeb}) {
+    Widget formContent = Form(
+      key: isWeb ? _formKey : GlobalKey<FormState>(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (isWeb) ...[
+            const Text(
+              'Iniciar Sesión',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: UAGRMTheme.textDark,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Ingresa tu número de registro universitario',
+              style: TextStyle(fontSize: 13, color: UAGRMTheme.textGrey),
+            ),
+            const SizedBox(height: 28),
+          ] else ...[
+            const Text(
+              'Registro Universitario',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: UAGRMTheme.textDark),
+            ),
+            const SizedBox(height: 16),
+          ],
+          TextFormField(
+            controller: _registroController,
+            keyboardType: TextInputType.number,
+            style: TextStyle(fontSize: isWeb ? 14 : 16),
+            decoration: InputDecoration(
+              hintText: 'Ej: 218001234',
+              labelText: isWeb ? 'Nro. de Registro' : null,
+              prefixIcon: const Icon(Icons.badge_outlined, size: 20),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: isWeb ? 12 : 16,
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) return 'Ingrese su registro universitario';
+              if (value.length < 6) return 'Registro inválido';
+              return null;
+            },
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: isWeb ? 44 : 52,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handleLogin,
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: isWeb ? 0 : 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(isWeb ? 8 : 12),
+                ),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(
+                      'Ingresar',
+                      style: TextStyle(fontSize: isWeb ? 14 : 16),
+                    ),
+            ),
+          ),
+          if (isWeb) ...[
+            const SizedBox(height: 20),
+            const Divider(),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.info_outline, size: 14, color: UAGRMTheme.textGrey),
+                const SizedBox(width: 6),
+                const Text(
+                  'Tu registro está en tu carnet universitario',
+                  style: TextStyle(fontSize: 12, color: UAGRMTheme.textGrey),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (isWeb) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: formContent,
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: formContent,
     );
   }
 }

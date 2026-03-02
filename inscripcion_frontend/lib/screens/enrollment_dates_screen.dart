@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/providers/registration_provider.dart';
+import 'package:inscripcion_frontend/widgets/web_page_header.dart';
 
 class EnrollmentDatesScreen extends StatefulWidget {
   const EnrollmentDatesScreen({super.key});
@@ -16,13 +18,15 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-    );
+    if (!kIsWeb) {
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+      );
+    }
   }
 
   final String getDatesQuery = """
@@ -36,195 +40,198 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
     }
   """;
 
+  // Datos de ejemplo
+  final List<Map<String, dynamic>> datesData = [
+    {
+      'periodoHabilitado': '2025-1',
+      'fechaInicio': '2025-02-01',
+      'fechaFin': '2025-02-15',
+      'estado': 'HABILITADO'
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<RegistrationProvider>();
     final studentRegister = provider.studentRegister;
 
+    final content = _buildContent();
+
+    if (kIsWeb) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF4F6F9),
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              WebPageHeader(
+                title: 'Fechas de Inscripción',
+                icon: Icons.calendar_month_outlined,
+                subtitle: 'Consulta los periodos y fechas habilitadas para inscripción',
+              ),
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 800),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: content,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Móvil: diseño original
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fechas de Inscripción'),
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Query(
-          options: QueryOptions(
-            document: gql(getDatesQuery),
-            variables: {'registro': studentRegister ?? ''},
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Banner móvil
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [UAGRMTheme.primaryBlue, Color(0xFF1565C0)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Column(
+                    children: [
+                      Icon(Icons.calendar_month, size: 48, color: Colors.white),
+                      SizedBox(height: 8),
+                      Text(
+                        'Periodos de Inscripción',
+                        style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                content,
+              ],
+            ),
           ),
-          builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
-            // Datos de ejemplo mientras no haya backend
-            final datesData = [
-              {
-                'periodoHabilitado': '2025-1',
-                'fechaInicio': '2025-02-01',
-                'fechaFin': '2025-02-15',
-                'estado': 'HABILITADO'
-              },
-            ];
+        ),
+      ),
+    );
+  }
 
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+  Widget _buildContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (kIsWeb) ...[
+          const Text(
+            'Periodos de Inscripción',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: UAGRMTheme.textDark),
+          ),
+          const SizedBox(height: 12),
+        ],
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(kIsWeb ? 8 : 8),
+            boxShadow: kIsWeb
+                ? [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))]
+                : null,
+          ),
+          child: Column(
+            children: [
+              // Encabezado tabla
+              Container(
+                decoration: BoxDecoration(
+                  color: kIsWeb ? Colors.grey.shade100 : Colors.black,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                child: Row(
                   children: [
-                    // Header Card
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [UAGRMTheme.primaryBlue, Color(0xFF1565C0)],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Column(
-                        children: [
-                          Icon(Icons.calendar_month, size: 48, color: Colors.white),
-                          SizedBox(height: 8),
-                          Text(
-                            'Periodos de Inscripción',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Table
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        children: [
-                          // Table Header
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                            child: const Row(
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    'PERIODO HABILITADO',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    'FECHA DE INICIO',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    'FECHA FIN',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    'ESTADO',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Table Rows
-                          ...datesData.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final item = entry.value;
-                            final isEven = index % 2 == 0;
-
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: isEven ? Colors.grey.shade300 : Colors.grey.shade400,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      item['periodoHabilitado'] ?? '',
-                                      style: const TextStyle(fontSize: 12),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      item['fechaInicio'] ?? '',
-                                      style: const TextStyle(fontSize: 12),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      item['fechaFin'] ?? '',
-                                      style: const TextStyle(fontSize: 12),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      item['estado'] ?? '',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
+                    _headerCell('PERIODO', flex: 2, isWeb: kIsWeb),
+                    _headerCell('FECHA DE INICIO', flex: 2, isWeb: kIsWeb),
+                    _headerCell('FECHA FIN', flex: 2, isWeb: kIsWeb),
+                    _headerCell('ESTADO', flex: 2, isWeb: kIsWeb),
                   ],
                 ),
               ),
-            );
-          },
+              // Filas
+              ...datesData.asMap().entries.map((entry) {
+                final isEven = entry.key % 2 == 0;
+                final item = entry.value;
+                final estado = item['estado'] ?? '';
+                final isHabilitado = estado == 'HABILITADO';
+                return Container(
+                  decoration: BoxDecoration(
+                    color: kIsWeb
+                        ? (isEven ? Colors.white : const Color(0xFFFAFAFA))
+                        : (isEven ? Colors.grey.shade300 : Colors.grey.shade400),
+                    border: kIsWeb ? Border(top: BorderSide(color: Colors.grey.shade100)) : null,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  child: Row(
+                    children: [
+                      Expanded(flex: 2, child: Text(item['periodoHabilitado'] ?? '', style: TextStyle(fontSize: kIsWeb ? 13 : 12), textAlign: TextAlign.center)),
+                      Expanded(flex: 2, child: Text(item['fechaInicio'] ?? '', style: TextStyle(fontSize: kIsWeb ? 13 : 12), textAlign: TextAlign.center)),
+                      Expanded(flex: 2, child: Text(item['fechaFin'] ?? '', style: TextStyle(fontSize: kIsWeb ? 13 : 12), textAlign: TextAlign.center)),
+                      Expanded(
+                        flex: 2,
+                        child: Center(
+                          child: kIsWeb
+                              ? Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: isHabilitado ? UAGRMTheme.successGreen.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: isHabilitado ? UAGRMTheme.successGreen : Colors.orange),
+                                  ),
+                                  child: Text(
+                                    estado,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: isHabilitado ? UAGRMTheme.successGreen : Colors.orange,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                )
+                              : Text(estado, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
         ),
+      ],
+    );
+  }
+
+  Widget _headerCell(String text, {required int flex, required bool isWeb}) {
+    return Expanded(
+      flex: flex,
+      child: Text(
+        text,
+        style: TextStyle(
+          color: isWeb ? UAGRMTheme.textGrey : Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }

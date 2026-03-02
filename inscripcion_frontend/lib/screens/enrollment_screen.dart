@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -5,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/providers/registration_provider.dart';
 import 'package:inscripcion_frontend/utils/time_formatter.dart';
+import 'package:inscripcion_frontend/widgets/web_page_header.dart';
 
 class EnrollmentScreen extends StatefulWidget {
   const EnrollmentScreen({super.key});
@@ -33,13 +35,15 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-    );
+    if (!kIsWeb) {
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+      );
+    }
   }
 
   final List<Map<String, dynamic>> periods = [
@@ -164,6 +168,34 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
     final studentRegister = provider.studentRegister;
     final codigoCarrera = provider.selectedCareer?.code;
 
+    if (kIsWeb) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF4F6F9),
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              WebPageHeader(
+                title: 'Inscripción',
+                icon: Icons.app_registration,
+                subtitle: 'Selecciona y confirma tus materias para este periodo',
+              ),
+              Expanded(
+                child: selectedPeriod == null
+                    ? _buildWebPeriodSelection()
+                    : Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1000),
+                          child: _buildEnrollmentFlow(studentRegister ?? '', codigoCarrera ?? ''),
+                        ),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inscripción'),
@@ -179,6 +211,91 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
       ),
     );
   }
+
+  Widget _buildWebPeriodSelection() {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // --- Barra azul de título ---
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [UAGRMTheme.primaryBlue, Color(0xFF1565C0)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Seleccionar Periodo',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    const SizedBox(height: 4),
+                    Text('Elige el periodo académico para continuar con la inscripción.',
+                        style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.85))),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              // --- Lista de periodos ---
+              ...periods.map((period) {
+                final periodName = period['nombre'] ?? '';
+                final isActive = period['activo'] ?? false;
+                return InkWell(
+                  onTap: isActive ? () => setState(() => selectedPeriod = periodName) : null,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: isActive ? UAGRMTheme.primaryBlue.withOpacity(0.3) : Colors.grey.shade200),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 2))],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36, height: 36,
+                          decoration: BoxDecoration(color: UAGRMTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                          child: const Icon(Icons.calendar_today, color: UAGRMTheme.primaryBlue, size: 18),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(periodName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                              Text(isActive ? 'Periodo activo — haz clic para continuar' : 'Inactivo',
+                                  style: TextStyle(fontSize: 12, color: isActive ? UAGRMTheme.successGreen : UAGRMTheme.textGrey)),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: isActive ? UAGRMTheme.primaryBlue : Colors.grey.shade300),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildPeriodSelection() {
     return Column(
@@ -356,21 +473,30 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
         distinctSubjects.every((code) => selectedSubjectCodes.contains(code));
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [UAGRMTheme.primaryBlue, Color(0xFF1565C0)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
             'Seleccione Todas las Materias',
-            style: TextStyle(fontWeight: FontWeight.bold, color: UAGRMTheme.textDark),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           Checkbox(
             value: allSelected,
-            activeColor: UAGRMTheme.primaryBlue,
+            activeColor: Colors.white,
+            checkColor: UAGRMTheme.primaryBlue,
+            side: const BorderSide(color: Colors.white70, width: 1.5),
             onChanged: distinctSubjects.isEmpty
                 ? null
                 : (val) {
