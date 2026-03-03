@@ -127,10 +127,11 @@ class EnabledSubjectsScreen extends StatelessWidget {
 
                     // Tabla web
                     Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: Colors.grey.shade300, width: 1),
                         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
                       ),
                       child: Column(
@@ -138,18 +139,17 @@ class EnabledSubjectsScreen extends StatelessWidget {
                           // Header
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade50,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
-                              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                            decoration: const BoxDecoration(
+                              color: UAGRMTheme.primaryBlue,
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
                             ),
                             child: const Row(
                               children: [
-                                SizedBox(width: 80, child: Text('CÓDIGO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: UAGRMTheme.textGrey))),
-                                Expanded(child: Text('NOMBRE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: UAGRMTheme.textGrey))),
-                                SizedBox(width: 80, child: Text('CRÉDITOS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: UAGRMTheme.textGrey), textAlign: TextAlign.center)),
-                                SizedBox(width: 80, child: Text('SEMESTRE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: UAGRMTheme.textGrey), textAlign: TextAlign.center)),
-                                SizedBox(width: 100, child: Text('TIPO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: UAGRMTheme.textGrey), textAlign: TextAlign.center)),
+                                SizedBox(width: 80, child: Text('CÓDIGO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white))),
+                                Expanded(child: Text('NOMBRE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white))),
+                                SizedBox(width: 80, child: Text('CRÉDITOS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white), textAlign: TextAlign.center)),
+                                SizedBox(width: 80, child: Text('SEMESTRE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white), textAlign: TextAlign.center)),
+                                SizedBox(width: 100, child: Text('TIPO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white), textAlign: TextAlign.center)),
                               ],
                             ),
                           ),
@@ -161,7 +161,7 @@ class EnabledSubjectsScreen extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
                                 color: i % 2 == 0 ? Colors.white : const Color(0xFFFAFAFA),
-                                border: i > 0 ? Border(top: BorderSide(color: Colors.grey.shade100)) : null,
+                                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
                               ),
                               child: Row(
                                 children: [

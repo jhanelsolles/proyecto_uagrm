@@ -137,26 +137,24 @@ class EnrollmentSlipScreen extends StatelessWidget {
                     // Encabezado boleta
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: UAGRMTheme.primaryBlue.withOpacity(0.04),
-                        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(9)),
+                      decoration: const BoxDecoration(
+                        color: UAGRMTheme.primaryBlue,
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(9)),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.description, color: UAGRMTheme.primaryBlue, size: 20),
+                          const Icon(Icons.description, color: Colors.white, size: 20),
                           const SizedBox(width: 10),
                           Text(
                             'BOLETA DE INSCRIPCIÓN — $nombrePeriodo',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: UAGRMTheme.textDark, letterSpacing: 0.3),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white, letterSpacing: 0.3),
                           ),
                           const Spacer(),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: UAGRMTheme.successGreen.withOpacity(0.1),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: UAGRMTheme.successGreen.withOpacity(0.4)),
                             ),
                             child: const Text('INSCRITO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: UAGRMTheme.successGreen)),
                           ),
@@ -244,49 +242,63 @@ class EnrollmentSlipScreen extends StatelessWidget {
   }
 
   Widget _buildWebTable(List<dynamic> materias) {
-    const headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: UAGRMTheme.textGrey);
+    const headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            children: const [
-              SizedBox(width: 80, child: Text('SIGLA', style: headerStyle)),
-              SizedBox(width: 55, child: Text('GRUPO', style: headerStyle, textAlign: TextAlign.center)),
-              Expanded(child: Text('NOMBRE MATERIA', style: headerStyle)),
-              SizedBox(width: 55, child: Text('CRÉD', style: headerStyle, textAlign: TextAlign.center)),
-              SizedBox(width: 45, child: Text('SEM', style: headerStyle, textAlign: TextAlign.center)),
-              SizedBox(width: 180, child: Text('HORARIO', style: headerStyle)),
-              SizedBox(width: 100, child: Text('MODALIDAD', style: headerStyle, textAlign: TextAlign.center)),
-            ],
-          ),
-        ),
-        Container(height: 1, color: Colors.grey.shade200),
-        ...materias.asMap().entries.map((entry) {
-          final i = entry.key;
-          final item = entry.value;
-          final materia = item['materia'] as Map<String, dynamic>? ?? {};
-          final oferta = item['oferta'] as Map<String, dynamic>? ?? {};
-          return Container(
-            color: i % 2 == 0 ? Colors.white : const Color(0xFFFAFAFA),
-            padding: const EdgeInsets.symmetric(vertical: 10),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            decoration: const BoxDecoration(
+              color: UAGRMTheme.primaryBlue,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
+            ),
             child: Row(
-              children: [
-                SizedBox(width: 80, child: Text(materia['codigo'] ?? '', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: UAGRMTheme.primaryBlue))),
-                SizedBox(width: 55, child: Text(oferta['grupo'] ?? item['grupo'] ?? '', style: const TextStyle(fontSize: 12), textAlign: TextAlign.center)),
-                Expanded(child: Text(materia['nombre'] ?? '', style: const TextStyle(fontSize: 12))),
-                SizedBox(width: 55, child: Text('${materia['creditos'] ?? ''}', style: const TextStyle(fontSize: 12), textAlign: TextAlign.center)),
-                SizedBox(width: 45, child: Text('${oferta['semestre'] ?? 0}', style: const TextStyle(fontSize: 12), textAlign: TextAlign.center)),
-                SizedBox(width: 180, child: Text(TimeFormatter.formatHorario(oferta['horario'] ?? ''), style: const TextStyle(fontSize: 11))),
-                SizedBox(width: 100, child: Text('PRESENCIAL', style: const TextStyle(fontSize: 11, color: UAGRMTheme.textGrey), textAlign: TextAlign.center)),
+              children: const [
+                SizedBox(width: 80, child: Text('SIGLA', style: headerStyle)),
+                SizedBox(width: 55, child: Text('GRUPO', style: headerStyle, textAlign: TextAlign.center)),
+                Expanded(child: Text('NOMBRE MATERIA', style: headerStyle)),
+                SizedBox(width: 55, child: Text('CRÉD', style: headerStyle, textAlign: TextAlign.center)),
+                SizedBox(width: 45, child: Text('SEM', style: headerStyle, textAlign: TextAlign.center)),
+                SizedBox(width: 180, child: Text('HORARIO', style: headerStyle)),
+                SizedBox(width: 100, child: Text('MODALIDAD', style: headerStyle, textAlign: TextAlign.center)),
               ],
             ),
-          );
-        }),
-      ],
+          ),
+          ...materias.asMap().entries.map((entry) {
+            final i = entry.key;
+            final item = entry.value;
+            final materia = item['materia'] as Map<String, dynamic>? ?? {};
+            final oferta = item['oferta'] as Map<String, dynamic>? ?? {};
+            return Container(
+              decoration: BoxDecoration(
+                color: i % 2 == 0 ? Colors.white : const Color(0xFFFAFAFA),
+                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+              child: Row(
+                children: [
+                  SizedBox(width: 80, child: Text(materia['codigo'] ?? '', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: UAGRMTheme.primaryBlue))),
+                  SizedBox(width: 55, child: Text(oferta['grupo'] ?? item['grupo'] ?? '', style: const TextStyle(fontSize: 12), textAlign: TextAlign.center)),
+                  Expanded(child: Text(materia['nombre'] ?? '', style: const TextStyle(fontSize: 12))),
+                  SizedBox(width: 55, child: Text('${materia['creditos'] ?? ''}', style: const TextStyle(fontSize: 12), textAlign: TextAlign.center)),
+                  SizedBox(width: 45, child: Text('${oferta['semestre'] ?? 0}', style: const TextStyle(fontSize: 12), textAlign: TextAlign.center)),
+                  SizedBox(width: 180, child: Text(TimeFormatter.formatHorario(oferta['horario'] ?? ''), style: const TextStyle(fontSize: 11))),
+                  SizedBox(width: 100, child: Text('PRESENCIAL', style: const TextStyle(fontSize: 11, color: UAGRMTheme.textGrey), textAlign: TextAlign.center)),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 
@@ -322,8 +334,15 @@ class EnrollmentSlipScreen extends StatelessWidget {
     final nombrePeriodo = periodo['nombre'] ?? periodo['codigo'] ?? '1/2026';
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(color: Colors.white, border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(4)),
-      child: Text('BOLETA DE INSCRIPCION $nombrePeriodo', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 0.5)),
+      decoration: BoxDecoration(
+        color: UAGRMTheme.primaryBlue, 
+        borderRadius: BorderRadius.circular(6)
+      ),
+      child: Text(
+        'BOLETA DE INSCRIPCIÓN $nombrePeriodo', 
+        textAlign: TextAlign.center, 
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 0.5)
+      ),
     );
   }
 
@@ -358,7 +377,7 @@ class EnrollmentSlipScreen extends StatelessWidget {
             columnWidths: const {0: FixedColumnWidth(70), 1: FixedColumnWidth(55), 2: FlexColumnWidth(4), 3: FixedColumnWidth(45), 4: FixedColumnWidth(45), 5: FixedColumnWidth(150), 6: FixedColumnWidth(45), 7: FixedColumnWidth(100)},
             children: [
               TableRow(
-                decoration: const BoxDecoration(color: Color(0xFFEEEEEE)),
+                decoration: const BoxDecoration(color: UAGRMTheme.primaryBlue),
                 children: ['SIGLA', 'GRUPO', 'NOMBRE MATERIA', 'CRÉD', 'SEM', 'HORARIO', 'REPR', 'MODALIDAD'].map((t) => _buildTableCell(t, isHeader: true)).toList(),
               ),
               if (materias.isEmpty)
@@ -387,7 +406,7 @@ class EnrollmentSlipScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
         decoration: BoxDecoration(border: Border(right: BorderSide(color: Colors.grey.shade300, width: 0.5), bottom: BorderSide(color: Colors.grey.shade300, width: 0.5))),
-        child: Text(text, style: TextStyle(fontSize: isHeader ? 8 : 9, fontWeight: isHeader ? FontWeight.bold : FontWeight.normal, color: Colors.black87), textAlign: TextAlign.center),
+        child: Text(text, style: TextStyle(fontSize: isHeader ? 8 : 9, fontWeight: isHeader ? FontWeight.bold : FontWeight.normal, color: isHeader ? Colors.white : Colors.black87), textAlign: TextAlign.center),
       ),
     );
   }

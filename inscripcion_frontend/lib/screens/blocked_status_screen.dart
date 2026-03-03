@@ -182,15 +182,14 @@ class _BlockedStatusScreenState extends State<BlockedStatusScreen> {
                 // Header
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
-                    border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                  decoration: const BoxDecoration(
+                    color: UAGRMTheme.primaryBlue,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
                   ),
                   child: const Row(
                     children: [
-                      Expanded(flex: 4, child: Text('MOTIVO DEL BLOQUEO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: UAGRMTheme.textGrey))),
-                      Expanded(flex: 2, child: Text('FECHA DE DESBLOQUEO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: UAGRMTheme.textGrey), textAlign: TextAlign.center)),
+                      Expanded(flex: 4, child: Text('MOTIVO DEL BLOQUEO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white))),
+                      Expanded(flex: 2, child: Text('FECHA DE DESBLOQUEO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white), textAlign: TextAlign.center)),
                     ],
                   ),
                 ),
@@ -230,15 +229,17 @@ class _BlockedStatusScreenState extends State<BlockedStatusScreen> {
 
   Widget _buildMobileTable() {
     return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300, width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
           Container(
             decoration: const BoxDecoration(
-              color: Colors.black,
+              color: UAGRMTheme.primaryBlue,
               borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
             ),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),

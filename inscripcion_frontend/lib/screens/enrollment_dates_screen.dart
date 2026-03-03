@@ -141,9 +141,10 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
           const SizedBox(height: 12),
         ],
         Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: Colors.grey.shade300, width: 1),
             borderRadius: BorderRadius.circular(kIsWeb ? 8 : 8),
             boxShadow: kIsWeb
                 ? [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))]
@@ -153,9 +154,9 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
             children: [
               // Encabezado tabla
               Container(
-                decoration: BoxDecoration(
-                  color: kIsWeb ? Colors.grey.shade100 : Colors.black,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
+                decoration: const BoxDecoration(
+                  color: UAGRMTheme.primaryBlue,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                 child: Row(
@@ -178,7 +179,7 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
                     color: kIsWeb
                         ? (isEven ? Colors.white : const Color(0xFFFAFAFA))
                         : (isEven ? Colors.grey.shade300 : Colors.grey.shade400),
-                    border: kIsWeb ? Border(top: BorderSide(color: Colors.grey.shade100)) : null,
+                    border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                   child: Row(
@@ -226,8 +227,8 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
       flex: flex,
       child: Text(
         text,
-        style: TextStyle(
-          color: isWeb ? UAGRMTheme.textGrey : Colors.white,
+        style: const TextStyle(
+          color: Colors.white,
           fontWeight: FontWeight.bold,
           fontSize: 11,
         ),
