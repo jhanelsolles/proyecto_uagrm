@@ -27,16 +27,16 @@ class PlanEstudios(models.Model):
     carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, related_name='planes')
     codigo = models.CharField(max_length=20, unique=True, verbose_name="Código del Plan")
     nombre = models.CharField(max_length=200, verbose_name="Nombre del Plan")
-    anio_vigencia = models.IntegerField(verbose_name="Año de Vigencia")
+    año_vigencia = models.IntegerField(verbose_name="Año de Vigencia")
     vigente = models.BooleanField(default=True, verbose_name="Plan Vigente")
     
     class Meta:
         verbose_name = "Plan de Estudios"
         verbose_name_plural = "Planes de Estudio"
-        ordering = ['-anio_vigencia']
+        ordering = ['año_vigencia']
     
     def __str__(self):
-        return f"{self.codigo} - {self.nombre} ({self.anio_vigencia})"
+        return f"{self.codigo} - {self.nombre} ({self.año_vigencia})"
 
 
 class Materia(models.Model):

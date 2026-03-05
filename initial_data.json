@@ -28,7 +28,7 @@
             "carrera": 1,
             "codigo": "PLAN-SIS-2020",
             "nombre": "Plan de Estudios Ingeniería de Sistemas 2020",
-            "anio_vigencia": 2020,
+            "año_vigencia": 2020,
             "vigente": true
         }
     },
@@ -39,7 +39,7 @@
             "carrera": 2,
             "codigo": "PLAN-IND-2020",
             "nombre": "Plan de Estudios Ingeniería Industrial 2020",
-            "anio_vigencia": 2020,
+            "año_vigencia": 2020,
             "vigente": true
         }
     },

@@ -53,7 +53,7 @@
 - carrera (FK)
 - codigo (único)
 - nombre
-- anio_vigencia
+- año_vigencia
 - vigente
 ```
 
@@ -147,12 +147,12 @@
 
 ### Queries de Perfil
 
-4. `perfilEstudiante` - Datos completos del estudiante
+1. `perfilEstudiante` - Datos completos del estudiante
 2. `estudiantePorRegistro` - Estudiante por registro
 
 ### Queries de Módulos
 
-6. `fechaInscripcionEstudiante` - Fecha asignada
+1. `fechaInscripcionEstudiante` - Fecha asignada
 2. `estadoBloqueoEstudiante` - Si está bloqueado
 3. `motivoBloqueoEstudiante` - Motivo del bloqueo
 4. `materiasHabilitadas` - Materias del semestre
@@ -161,11 +161,11 @@
 
 ### Queries Completas
 
-12. `inscripcionCompleta` - Toda la info de inscripción
+1. `inscripcionCompleta` - Toda la info de inscripción
 
 ### Queries Adicionales
 
-13. `todosPeriodos` - Todos los periodos
+1. `todosPeriodos` - Todos los periodos
 2. `todasMaterias` - Todas las materias
 
 ---

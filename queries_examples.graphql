@@ -50,7 +50,7 @@ query PerfilEstudiante {
     planEstudios {
       codigo
       nombre
-      anioVigencia
+      añoVigencia
     }
     modalidad
     lugarOrigen

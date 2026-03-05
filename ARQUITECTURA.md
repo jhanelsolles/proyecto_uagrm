@@ -185,7 +185,7 @@ Frontend
 │ id (PK)         │     │
 │ carrera_id (FK) │─────┘
 │ codigo          │
-│ anio_vigencia   │
+│ año_vigencia   │
 └─────────────────┘
          │
          │ 1

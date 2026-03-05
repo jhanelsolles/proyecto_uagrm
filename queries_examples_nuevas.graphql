@@ -165,7 +165,7 @@ query PerfilEstudiante {
     planEstudios {
       codigo
       nombre
-      anioVigencia
+      añoVigencia
     }
     email
     telefono
