@@ -15,10 +15,10 @@ class CarreraAdmin(admin.ModelAdmin):
 
 @admin.register(PlanEstudios)
 class PlanEstudiosAdmin(admin.ModelAdmin):
-    list_display = ['codigo', 'nombre', 'carrera', 'año_vigencia', 'vigente']
-    list_filter = ['vigente', 'carrera', 'año_vigencia']
+    list_display = ['codigo', 'nombre', 'carrera', 'anio_vigencia', 'vigente']
+    list_filter = ['vigente', 'carrera', 'anio_vigencia']
     search_fields = ['codigo', 'nombre']
-    ordering = ['-año_vigencia']
+    ordering = ['-anio_vigencia']
 
 
 @admin.register(Materia)

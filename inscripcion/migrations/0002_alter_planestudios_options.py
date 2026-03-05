@@ -12,6 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='planestudios',
-            options={'ordering': ['año_vigencia'], 'verbose_name': 'Plan de Estudios', 'verbose_name_plural': 'Planes de Estudio'},
+            options={'ordering': ['anio_vigencia'], 'verbose_name': 'Plan de Estudios', 'verbose_name_plural': 'Planes de Estudio'},
         ),
     ]
