@@ -10,6 +10,7 @@ from inscripcion.services import (
     EstudianteService, InscripcionService, PeriodoAcademicoService,
     CarreraService, BloqueoService, PanelService
 )
+from django.core.cache import cache
 from inscripcion.models import Carrera, Materia, Bloqueo
 
 class Query(graphene.ObjectType):
@@ -170,6 +171,13 @@ class Query(graphene.ObjectType):
             carreras = EstudianteService.get_carreras_estudiante(registro)
             return [c.carrera for c in carreras]
 
+        if activa is None and registro is None:
+            return cache.get_or_set(
+                'todas_carreras_base',
+                lambda: list(Carrera.objects.all()),
+                timeout=3600
+            )
+
         queryset = Carrera.objects.all()
         if activa is not None:
             queryset = queryset.filter(activa=activa)
@@ -187,7 +195,11 @@ class Query(graphene.ObjectType):
         return PeriodoAcademicoService.get_todos_periodos(activo)
 
     def resolve_todas_materias(self, info):
-        return Materia.objects.all()
+        return cache.get_or_set(
+            'todas_materias_plano',
+            lambda: list(Materia.objects.all()),
+            timeout=3600
+        )
     
     def resolve_todos_bloqueos(self, info, registro=None):
         """Obtiene todos los bloqueos, opcionalmente filtrados por estudiante"""

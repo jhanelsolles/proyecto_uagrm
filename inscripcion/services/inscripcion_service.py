@@ -3,6 +3,9 @@ Servicio para gestión de inscripciones
 """
 from typing import Optional, List
 from django.db import models
+from django.core.cache import cache
+import hashlib
+import json
 from inscripcion.models import Inscripcion, PeriodoAcademico, MateriaCarreraSemestre
 from .periodo_service import PeriodoAcademicoService
 from .estudiante_service import EstudianteService
@@ -117,9 +120,19 @@ class InscripcionService:
         """
         Obtiene ofertas de materias filtradas según múltiples criterios
         """
+        cache_key_data = {
+            'm': codigo_materia, 'c': codigo_carrera, 'p': codigo_periodo,
+            't': turno, 'cupo': tiene_cupo, 'doc': docente, 'g': grupo
+        }
+        hash_str = hashlib.md5(json.dumps(cache_key_data, sort_keys=True).encode('utf-8')).hexdigest()
+        cache_key = f'ofertas_materias_filter_{hash_str}'
+        
+        result = cache.get(cache_key)
+        if result is not None:
+             return result
+             
         from inscripcion.models import OfertaMateria, PeriodoAcademico
         
-        # Obtener periodo activo si no se provee
         if not codigo_periodo:
             periodo = PeriodoAcademico.objects.filter(activo=True).first()
         else:
@@ -154,14 +167,9 @@ class InscripcionService:
             else:
                 queryset = queryset.filter(cupo_actual__gte=models.F('cupo_maximo'))
                 
-        # Filtrado por Turno (lógica basada en horario)
-        # Mañana: 07:00 - 12:00
-        # Tarde: 12:00 - 18:00
-        # Noche: 18:00 - 22:00
         if turno:
             turno = turno.upper()
             if turno == "MAÑANA":
-                # Buscamos patrones típicos de mañana en el string de horario
                 queryset = queryset.filter(horario__icontains="07:") | queryset.filter(horario__icontains="08:") | \
                            queryset.filter(horario__icontains="09:") | queryset.filter(horario__icontains="10:") | \
                            queryset.filter(horario__icontains="11:")
@@ -174,4 +182,7 @@ class InscripcionService:
                            queryset.filter(horario__icontains="20:") | queryset.filter(horario__icontains="21:") | \
                            queryset.filter(horario__icontains="22:")
 
-        return list(queryset)
+        ofertas = list(queryset)
+        cache.set(cache_key, ofertas, 300)
+        
+        return ofertas

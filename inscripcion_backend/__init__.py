@@ -1,1 +1,3 @@
-# Inicialización del paquete inscripcion_backend
+from .celery import app as celery_app
+
+__all__ = ('celery_app',)
