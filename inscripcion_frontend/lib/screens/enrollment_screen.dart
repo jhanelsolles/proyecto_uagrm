@@ -540,8 +540,6 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
                 ? null
                 : (val) {
                     if (val == true) {
-                      // Algoritmo inteligente: por cada materia buscar el mejor grupo disponible
-                      // Acumulamos la nueva selección progresivamente para validar choques
                       final newSelection = Map<String, dynamic>.from(selectedGroupsPerSubject);
                       final newCodes = Set<String>.from(selectedSubjectCodes);
 
@@ -660,137 +658,149 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Table(
-              columnWidths: const {
-                0: FixedColumnWidth(50),
-                1: FixedColumnWidth(80),
-                2: FlexColumnWidth(),
-              },
-              children: [
-                _buildTableHeader(['OK', 'SIGLA', 'NOMBRE']),
-                ...codes.map((code) {
-                  final name = map[code]![0]['materiaNombre'];
-                  final isSelected = selectedSubjectCodes.contains(code);
-                  final hayCupo = _tieneCuposDisponibles(map[code]!);
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Table(
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                columnWidths: const {
+                  0: FixedColumnWidth(50),  // Checkbox
+                  1: FixedColumnWidth(80),  // Sigla
+                  2: FixedColumnWidth(200), // Nombre
+                  3: FixedColumnWidth(60),  // Grupo
+                  4: FixedColumnWidth(150), // Docente
+                  5: FixedColumnWidth(170), // Horario
+                  6: FixedColumnWidth(60),  // Cupos
+                },
+                children: [
+                  _buildTableHeader(['OK', 'SIGLA', 'NOMBRE', 'GRUPO', 'DOCENTE', 'HORARIO', 'CUPO']),
+                  ...codes.expand((code) {
+                    final grupos = map[code]!;
+                    final isMateriaSelected = selectedSubjectCodes.contains(code);
+                    final selectedGroupId = isMateriaSelected && selectedGroupsPerSubject[code] != null
+                        ? selectedGroupsPerSubject[code]!['id'] 
+                        : null;
 
-                  return TableRow(
-                    decoration: BoxDecoration(
-                      color: !hayCupo
-                          ? Colors.grey.shade100
-                          : isSelected
-                              ? UAGRMTheme.primaryBlue.withOpacity(0.05)
-                              : Colors.white,
-                      border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-                    ),
-                    children: [
-                      TableCell(
-                        child: !hayCupo
-                            ? Tooltip(
-                                message: 'Cupos llenos — no disponible para inscripción',
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Icon(Icons.lock_outline, size: 18, color: Colors.grey.shade400),
-                                ),
-                              )
-                            : Checkbox(
-                                value: isSelected,
-                                activeColor: UAGRMTheme.primaryBlue,
-                                onChanged: (val) {
-                                  if (val == true) {
-                                    // Verificar cupos
-                                    if (!hayCupo) {
-                                      _showTopSnackBar(
-                                        'Los cupos de "$name" están llenos. No es posible inscribirse.',
-                                      );
-                                      return;
-                                    }
-                                    // Verificar choque de horario antes de agregar
-                                    final firstGroup = map[code]!.isNotEmpty ? map[code]![0] : null;
-                                    if (firstGroup != null) {
-                                      // Excluir el grupo propio (si ya estaba) de la validación
-                                      final othersMap = Map<String, dynamic>.from(selectedGroupsPerSubject);
-                                      othersMap.remove(code);
-                                      final clashMsg = ScheduleValidator.checkClash(
-                                        firstGroup['horario'] ?? '',
-                                        firstGroup['materiaNombre'] ?? code,
-                                        othersMap,
-                                      );
-                                      if (clashMsg != null) {
-                                        _showTopSnackBar(clashMsg, color: Colors.orange.shade800);
-                                        return; // No agregar si hay choque
-                                      }
-                                    }
-                                    setState(() {
-                                      selectedSubjectCodes.add(code);
-                                      if (map[code]!.isNotEmpty) {
-                                        selectedGroupsPerSubject[code] = map[code]![0];
-                                      }
-                                    });
-                                  } else {
-                                    setState(() {
-                                      selectedSubjectCodes.remove(code);
-                                      selectedGroupsPerSubject.remove(code);
-                                    });
-                                  }
-                                },
-                              ),
-                      ),
-                      TableCell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Text(
-                            code,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: hayCupo ? null : Colors.grey.shade400,
+                    return grupos.map((g) {
+                      final hayCupo = (g['cuposDisponibles'] ?? 0) > 0;
+                      final isSelected = isMateriaSelected && selectedGroupId == g['id'];
+                      final isOtherGroupSelected = isMateriaSelected && selectedGroupId != g['id'];
+
+                      return TableRow(
+                        decoration: BoxDecoration(
+                          color: isOtherGroupSelected 
+                              ? Colors.grey.shade100 // Otro grupo de esta misma materia ya está elegido
+                              : !hayCupo
+                                  ? Colors.grey.shade100
+                                  : isSelected
+                                      ? UAGRMTheme.primaryBlue.withOpacity(0.05)
+                                      : Colors.white,
+                          border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                        ),
+                        children: [
+                          TableCell(
+                            child: !hayCupo
+                                ? Tooltip(
+                                    message: 'Cupos llenos',
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Icon(Icons.lock_outline, size: 18, color: Colors.grey.shade400),
+                                    ),
+                                  )
+                                : isOtherGroupSelected
+                                    ? Tooltip(
+                                        message: 'Ya seleccionaste otro grupo de esta materia',
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: Icon(Icons.do_not_disturb_on_outlined, size: 18, color: Colors.grey.shade400),
+                                        ),
+                                      )
+                                    : Checkbox(
+                                        value: isSelected,
+                                        activeColor: UAGRMTheme.primaryBlue,
+                                        onChanged: (val) {
+                                          if (val == true) {
+                                            // Verificar cupos (redundante pero seguro)
+                                            if (!hayCupo) {
+                                              _showTopSnackBar('El grupo ${g['grupo']} de ${g['materiaNombre']} está lleno.');
+                                              return;
+                                            }
+                                            // Verificar choque de horario (excluyendo la materia actual si se está cambiando de grupo)
+                                            final othersMap = Map<String, dynamic>.from(selectedGroupsPerSubject);
+                                            othersMap.remove(code); // Si ya tenía un grupo, no choca consigo mismo
+                                            
+                                            final clashMsg = ScheduleValidator.checkClash(
+                                              g['horario'] ?? '',
+                                              g['materiaNombre'] ?? code,
+                                              othersMap,
+                                            );
+                                            if (clashMsg != null) {
+                                              _showTopSnackBar(clashMsg, color: Colors.orange.shade800);
+                                              return; 
+                                            }
+                                            setState(() {
+                                              selectedSubjectCodes.add(code);
+                                              selectedGroupsPerSubject[code] = g;
+                                            });
+                                          } else {
+                                            setState(() {
+                                              selectedSubjectCodes.remove(code);
+                                              selectedGroupsPerSubject.remove(code);
+                                            });
+                                          }
+                                        },
+                                      ),
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(code, style: TextStyle(fontSize: 12, color: (hayCupo && !isOtherGroupSelected) ? null : Colors.grey.shade500)),
                             ),
                           ),
-                        ),
-                      ),
-                      TableCell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  name,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: hayCupo ? null : Colors.grey.shade400,
-                                    fontStyle: hayCupo ? null : FontStyle.italic,
-                                  ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(g['materiaNombre'] ?? '', style: TextStyle(fontSize: 12, color: (hayCupo && !isOtherGroupSelected) ? null : Colors.grey.shade500)),
+                            ),
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(g['grupo'] ?? '', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: (hayCupo && !isOtherGroupSelected) ? null : Colors.grey.shade500)),
+                            ),
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(g['docente'] ?? '', style: TextStyle(fontSize: 11, color: (hayCupo && !isOtherGroupSelected) ? null : Colors.grey.shade500)),
+                            ),
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(TimeFormatter.formatHorario(g['horario'] ?? ''), style: TextStyle(fontSize: 11, color: (hayCupo && !isOtherGroupSelected) ? null : Colors.grey.shade500)),
+                            ),
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                '${g['cuposDisponibles'] ?? 0}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: hayCupo 
+                                      ? (isOtherGroupSelected ? Colors.grey.shade400 : UAGRMTheme.successGreen)
+                                      : Colors.grey.shade400,
                                 ),
                               ),
-                              if (!hayCupo)
-                                Tooltip(
-                                  message: 'Sin cupos disponibles',
-                                  child: Container(
-                                    margin: const EdgeInsets.only(left: 4),
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: UAGRMTheme.errorRed.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(color: UAGRMTheme.errorRed.withOpacity(0.4)),
-                                    ),
-                                    child: Text(
-                                      'LLENO',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                        color: UAGRMTheme.errorRed,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-              ],
+                        ],
+                      );
+                    }).toList();
+                  }).toList(),
+                ],
+              ),
             ),
           ),
         ),

@@ -46,14 +46,26 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         if (result.hasException) {
+          String errorMsg = 'Error al conectar con el servidor';
+          final exception = result.exception;
+          if (exception != null) {
+            if (exception.linkException != null) {
+              errorMsg = 'Sin conexión al servidor: ${exception.linkException.toString()}';
+            } else if (exception.graphqlErrors.isNotEmpty) {
+              errorMsg = 'Error: ${exception.graphqlErrors.first.message}';
+            }
+          }
+          // ignore: avoid_print
+          print('GraphQL Exception: $exception');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error al conectar con el servidor')),
+              SnackBar(content: Text(errorMsg), duration: const Duration(seconds: 8)),
             );
           }
           setState(() => _isLoading = false);
           return;
         }
+
 
         final List carrerasData = result.data?['misCarreras'] ?? [];
 

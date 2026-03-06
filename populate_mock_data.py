@@ -10,7 +10,6 @@ from inscripcion.models import Carrera, PlanEstudios, Materia, MateriaCarreraSem
 def populate():
     print("Poblando datos académicos...")
 
-    # 1. Asegurar Materias
     materias_data = [
         {"codigo": "LIN-100", "nombre": "Introducción a la Programación", "creditos": 5},
         {"codigo": "MAT-101", "nombre": "Cálculo I", "creditos": 5},
@@ -32,7 +31,6 @@ def populate():
         materias_objs[m["codigo"]] = obj
         if created: print(f"Materia creada: {m['codigo']}")
 
-    # 0. Asegurar Estudiante 2150826 (Recomendado)
     est_2150826, created = Estudiante.objects.get_or_create(
         registro="2150826",
         defaults={
@@ -49,11 +47,9 @@ def populate():
     )
     if created: print("Estudiante 2150826 creado")
 
-    #SIS (Carrera 1, Plan 1)
     sis_carrera = Carrera.objects.get(codigo="ING-SIS")
     sis_plan = PlanEstudios.objects.get(carrera=sis_carrera, vigente=True)
 
-    # Asegurar Relación Carrera para 2150826
     EstudianteCarrera.objects.get_or_create(
         estudiante=est_2150826,
         carrera=sis_carrera,
@@ -61,27 +57,66 @@ def populate():
         defaults={"semestre_actual": 2, "modalidad": "PRESENCIAL", "activa": True}
     )
 
-    # 1. Asegurar Materias
     MateriaCarreraSemestre.objects.get_or_create(carrera=sis_carrera, plan_estudios=sis_plan, materia=materias_objs["MAT-101"], semestre=1)
     MateriaCarreraSemestre.objects.get_or_create(carrera=sis_carrera, plan_estudios=sis_plan, materia=materias_objs["LIN-100"], semestre=1)
     MateriaCarreraSemestre.objects.get_or_create(carrera=sis_carrera, plan_estudios=sis_plan, materia=materias_objs["FIS-101"], semestre=1)
 
-    # SIS Semestre 2
     MateriaCarreraSemestre.objects.get_or_create(carrera=sis_carrera, plan_estudios=sis_plan, materia=materias_objs["MAT-102"], semestre=2)
     MateriaCarreraSemestre.objects.get_or_create(carrera=sis_carrera, plan_estudios=sis_plan, materia=materias_objs["LIN-200"], semestre=2)
 
-    # SIS Semestre 3 (Juan Carlos 218001234 está aquí)
     MateriaCarreraSemestre.objects.get_or_create(carrera=sis_carrera, plan_estudios=sis_plan, materia=materias_objs["LIN-300"], semestre=3)
     MateriaCarreraSemestre.objects.get_or_create(carrera=sis_carrera, plan_estudios=sis_plan, materia=materias_objs["LIN-310"], semestre=3)
 
-    # IND (Carrera 2, Plan 2)
     ind_carrera = Carrera.objects.get(codigo="ING-IND")
     ind_plan = PlanEstudios.objects.get(carrera=ind_carrera, vigente=True)
 
-    # IND Semestre 1 (Juan Carlos 218001234 también está aquí)
     MateriaCarreraSemestre.objects.get_or_create(carrera=ind_carrera, plan_estudios=ind_plan, materia=materias_objs["MAT-101"], semestre=1)
     MateriaCarreraSemestre.objects.get_or_create(carrera=ind_carrera, plan_estudios=ind_plan, materia=materias_objs["IND-101"], semestre=1)
     MateriaCarreraSemestre.objects.get_or_create(carrera=ind_carrera, plan_estudios=ind_plan, materia=materias_objs["IND-102"], semestre=1)
+
+    med_carrera, _ = Carrera.objects.get_or_create(codigo="MED-001", defaults={"nombre": "Medicina", "facultad": "Facultad de Ciencias de la Salud Humana", "duracion_semestres": 12, "activa": True})
+    med_plan, _ = PlanEstudios.objects.get_or_create(carrera=med_carrera, codigo="PLAN-MED-2022", defaults={"nombre": "Plan de Estudios Medicina 2022", "anio_vigencia": 2022, "vigente": True})
+
+    arq_carrera, _ = Carrera.objects.get_or_create(codigo="ARQ-001", defaults={"nombre": "Arquitectura", "facultad": "Facultad de Ciencias del Hábitat", "duracion_semestres": 10, "activa": True})
+    arq_plan, _ = PlanEstudios.objects.get_or_create(carrera=arq_carrera, codigo="PLAN-ARQ-2020", defaults={"nombre": "Plan de Estudios Arquitectura 2020", "anio_vigencia": 2020, "vigente": True})
+
+    nuevas_materias = [
+        {"codigo": "ANA-101", "nombre": "Anatomía I", "creditos": 6},
+        {"codigo": "BIO-101", "nombre": "Biología Celular", "creditos": 4},
+        {"codigo": "HIS-101", "nombre": "Histología", "creditos": 5},
+        {"codigo": "DIR-101", "nombre": "Dibujo Arquitectónico", "creditos": 5},
+        {"codigo": "HIA-101", "nombre": "Historia de la Arquitectura", "creditos": 4},
+        {"codigo": "DIS-101", "nombre": "Diseño I", "creditos": 6},
+    ]
+    for m in nuevas_materias:
+        obj, c = Materia.objects.get_or_create(codigo=m["codigo"], defaults={"nombre": m["nombre"], "creditos": m["creditos"]})
+        materias_objs[m["codigo"]] = obj
+
+    MateriaCarreraSemestre.objects.get_or_create(carrera=med_carrera, plan_estudios=med_plan, materia=materias_objs["ANA-101"], semestre=1)
+    MateriaCarreraSemestre.objects.get_or_create(carrera=med_carrera, plan_estudios=med_plan, materia=materias_objs["BIO-101"], semestre=1)
+    MateriaCarreraSemestre.objects.get_or_create(carrera=med_carrera, plan_estudios=med_plan, materia=materias_objs["HIS-101"], semestre=2)
+
+    MateriaCarreraSemestre.objects.get_or_create(carrera=arq_carrera, plan_estudios=arq_plan, materia=materias_objs["DIR-101"], semestre=1)
+    MateriaCarreraSemestre.objects.get_or_create(carrera=arq_carrera, plan_estudios=arq_plan, materia=materias_objs["DIS-101"], semestre=1)
+    MateriaCarreraSemestre.objects.get_or_create(carrera=arq_carrera, plan_estudios=arq_plan, materia=materias_objs["HIA-101"], semestre=2)
+
+    est_med, _ = Estudiante.objects.get_or_create(
+        registro="220001111",
+        defaults={"nombre": "Roberto", "apellido_paterno": "Suarez", "apellido_materno": "Gomez", "documento_identidad": "4455667", "email": "roberto@estudiante.uagrm.edu.bo", "telefono": "78111111", "activo": True, "fecha_ingreso": "2022-02-01"}
+    )
+    EstudianteCarrera.objects.get_or_create(estudiante=est_med, carrera=med_carrera, plan_estudios=med_plan, defaults={"semestre_actual": 1, "modalidad": "PRESENCIAL", "activa": True})
+
+    est_arq, _ = Estudiante.objects.get_or_create(
+        registro="221002222",
+        defaults={"nombre": "Ana", "apellido_paterno": "Silva", "apellido_materno": "Rios", "documento_identidad": "5566778", "email": "ana.silva@estudiante.uagrm.edu.bo", "telefono": "78222222", "activo": True, "fecha_ingreso": "2021-02-01"}
+    )
+    EstudianteCarrera.objects.get_or_create(estudiante=est_arq, carrera=arq_carrera, plan_estudios=arq_plan, defaults={"semestre_actual": 2, "modalidad": "PRESENCIAL", "activa": True})
+
+    est_sis_adv, _ = Estudiante.objects.get_or_create(
+        registro="217003333",
+        defaults={"nombre": "Luis", "apellido_paterno": "Mendez", "apellido_materno": "Paz", "documento_identidad": "3344556", "email": "luis.mendez@uagrm.edu.bo", "telefono": "78333333", "activo": True, "fecha_ingreso": "2017-02-01"}
+    )
+    EstudianteCarrera.objects.get_or_create(estudiante=est_sis_adv, carrera=sis_carrera, plan_estudios=sis_plan, defaults={"semestre_actual": 4, "modalidad": "PRESENCIAL", "activa": True})
 
     print("Datos poblados exitosamente.")
 

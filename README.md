@@ -2,7 +2,7 @@
 
 Backend desarrollado con Django, GraphQL (Graphene) y PostgreSQL para un sistema de inscripción universitaria.
 
-## 🚀 Características
+## Características
 
 - **API GraphQL** completa con Graphene-Django
 - **Base de datos PostgreSQL** con modelos relacionales
@@ -11,13 +11,13 @@ Backend desarrollado con Django, GraphQL (Graphene) y PostgreSQL para un sistema
 - **Datos de prueba** incluidos para testing inmediato
 - **Panel de administración** de Django configurado
 
-## 📋 Requisitos Previos
+## Requisitos Previos
 
 - Docker Desktop instalado
 - Docker Compose instalado
 - Puerto 8000 y 5432 disponibles
 
-## 🛠️ Instalación y Ejecución
+## Instalación y Ejecución
 
 ### 1. Clonar o descargar el proyecto
 
@@ -43,7 +43,7 @@ Este comando:
 - **GraphQL Playground**: <http://localhost:8000/graphql/>
 - **Panel Admin**: <http://localhost:8000/admin/>
 
-## 👤 Datos de Prueba
+## Datos de Prueba
 
 ### Estudiantes de Prueba
 
@@ -63,7 +63,7 @@ Este comando:
 - Semestre: 2
 - Estado: Bloqueado (Deuda en biblioteca)
 
-## 🔍 Queries GraphQL Disponibles
+## Queries GraphQL Disponibles
 
 ### 1. Query para Inicio - Obtener Carreras
 
@@ -218,7 +218,7 @@ query {
 }
 ```
 
-## 📊 Modelos de Datos
+## Modelos de Datos
 
 ### Principales Entidades
 
@@ -231,7 +231,7 @@ query {
 7. **Inscripcion**: Inscripciones de estudiantes
 8. **InscripcionMateria**: Materias inscritas por estudiante
 
-## 🔧 Comandos Útiles
+## Comandos Útiles
 
 ### Detener los contenedores
 
@@ -263,7 +263,7 @@ docker-compose exec web python manage.py createsuperuser
 docker-compose exec web python manage.py loaddata initial_data.json
 ```
 
-## 🌐 Configuración CORS
+## Configuración CORS
 
 El backend está configurado para aceptar peticiones desde cualquier origen (`CORS_ALLOW_ALL_ORIGINS = True`).
 
@@ -277,7 +277,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 ```
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```text
 backend_inscripción/
@@ -297,7 +297,7 @@ backend_inscripción/
     └── ...
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Error: Puerto 8000 ya en uso
 
@@ -321,21 +321,21 @@ docker-compose down -v
 docker-compose up --build
 ```
 
-## 📝 Notas Importantes
+## Notas Importantes
 
 - El sistema **NO requiere autenticación** (acceso por ID de estudiante)
 - El servidor escucha en `0.0.0.0:8000` para permitir conexiones externas
 - Los datos de prueba se cargan automáticamente al iniciar
 - El periodo académico `1/2026` está activo por defecto
 
-## 🚀 Próximos Pasos
+## Próximos Pasos
 
 1. Conectar el frontend a `http://<IP_SERVIDOR>:8000/graphql/`
 2. Usar los queries de ejemplo para obtener datos
 3. Crear más estudiantes y datos de prueba según necesites
 4. Configurar CORS específico para producción
 
-## 📧 Soporte
+## Soporte
 
 Para problemas o consultas, revisa los logs con:
 
