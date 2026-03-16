@@ -357,7 +357,7 @@ class _LoginScreenState extends State<LoginScreen> {
             keyboardType: TextInputType.number,
             style: TextStyle(fontSize: isWide ? 14 : 16),
             decoration: InputDecoration(
-              hintText: 'Ej: 218001234',
+              hintText: '',
               labelText: isWide ? 'Nro. de Registro' : null,
               prefixIcon: const Icon(Icons.badge_outlined, size: 20),
               contentPadding: EdgeInsets.symmetric(
