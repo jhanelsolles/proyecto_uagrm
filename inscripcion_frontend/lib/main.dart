@@ -3,17 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
-import 'package:inscripcion_frontend/services/graphql_service.dart';
-import 'package:inscripcion_frontend/providers/registration_provider.dart';
-import 'package:inscripcion_frontend/providers/theme_provider.dart';
-import 'package:inscripcion_frontend/screens/login_screen.dart';
-import 'package:inscripcion_frontend/screens/career_selection_screen.dart';
-import 'package:inscripcion_frontend/screens/main_panel_screen.dart';
-import 'package:inscripcion_frontend/screens/enabled_subjects_screen.dart';
-import 'package:inscripcion_frontend/screens/enrollment_slip_screen.dart';
-import 'package:inscripcion_frontend/screens/blocked_status_screen.dart';
-import 'package:inscripcion_frontend/screens/enrollment_screen.dart';
-import 'package:inscripcion_frontend/screens/enrollment_dates_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/services/graphql_service.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/services/registration_provider.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/services/theme_provider.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/login_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/career_selection_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/main_panel_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/enabled_subjects_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/enrollment_slip_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/blocked_status_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/enrollment_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/enrollment_dates_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
