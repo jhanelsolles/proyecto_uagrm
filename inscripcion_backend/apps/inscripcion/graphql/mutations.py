@@ -39,7 +39,7 @@ class ConfirmarInscripcion(graphene.Mutation):
                 
                 return ConfirmarInscripcion(
                     ok=True,
-                    mensaje=f"Tu inscripción ha sido recibida y se está procesando (ID: {tarea_asincrona.id})."
+                    mensaje="Tu inscripción ha sido confirmada y procesada correctamente."
                 )
 
         except Exception as e:

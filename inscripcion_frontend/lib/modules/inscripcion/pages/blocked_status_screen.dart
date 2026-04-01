@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
-import 'package:inscripcion_frontend/modules/inscripcion/widgets/web_page_header.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/widgets/main_layout.dart';
 import 'package:inscripcion_frontend/shared/utils/responsive_helper.dart';
 
 class BlockedStatusScreen extends StatefulWidget {
@@ -46,70 +46,18 @@ class _BlockedStatusScreenState extends State<BlockedStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLarge = Responsive.isTabletOrDesktop(context);
-
-    if (isLarge) {
-      return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              WebPageHeader(
-                title: 'Estado de Bloqueo',
-                icon: Icons.lock_outline,
-                subtitle: 'Información sobre bloqueos activos en tu cuenta',
-              ),
-              Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: Responsive.isDesktop(context) ? 800 : 640,
-                    ),
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.all(Responsive.horizontalPadding(context)),
-                      child: _buildWebContent(),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+    return MainLayout(
+      currentRoute: '/blocked-status',
+      title: 'Estado de Bloqueo',
+      subtitle: 'Panel › Estado de Bloqueo',
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: Responsive.isDesktop(context) ? 800 : 640,
           ),
-        ),
-      );
-    }
-
-    // Móvil: diseño original
-    return Scaffold(
-      appBar: AppBar(title: const Text('Bloqueo'), centerTitle: true),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [UAGRMTheme.primaryBlue, Color(0xFF1565C0)],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Column(
-                    children: [
-                      Icon(Icons.lock_outline, size: 48, color: Colors.white),
-                      SizedBox(height: 8),
-                      Text('BLOQUEO',
-                          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _buildMobileTable(),
-              ],
-            ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(Responsive.horizontalPadding(context)),
+            child: _buildWebContent(),
           ),
         ),
       ),
@@ -222,41 +170,5 @@ class _BlockedStatusScreenState extends State<BlockedStatusScreen> {
     );
   }
 
-  Widget _buildMobileTable() {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey.shade300, width: 1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              color: UAGRMTheme.primaryBlue,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            child: const Row(
-              children: [
-                Expanded(flex: 3, child: Text('MOTIVO DEL BLOQUEO', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11), textAlign: TextAlign.center)),
-                Expanded(flex: 2, child: Text('FECHA DE DESBLOQUEO', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11), textAlign: TextAlign.center)),
-              ],
-            ),
-          ),
-          Container(
-            color: Colors.grey.shade300,
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-            child: Row(
-              children: [
-                Expanded(flex: 3, child: Text(blockData['motivo'] ?? '', style: const TextStyle(fontSize: 12), textAlign: TextAlign.center)),
-                Expanded(flex: 2, child: Text(blockData['fechaDesbloqueo'] ?? '', style: const TextStyle(fontSize: 12), textAlign: TextAlign.center)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

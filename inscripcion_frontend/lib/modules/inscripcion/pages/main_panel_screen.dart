@@ -5,11 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/models/student.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/services/registration_provider.dart';
-import 'package:inscripcion_frontend/modules/inscripcion/widgets/student_info_header.dart';
-import 'package:inscripcion_frontend/modules/inscripcion/widgets/option_button.dart';
-import 'package:inscripcion_frontend/shared/widgets/web_layout.dart';
-import 'package:inscripcion_frontend/modules/inscripcion/services/theme_provider.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/widgets/main_layout.dart';
 import 'package:inscripcion_frontend/shared/utils/responsive_helper.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MainPanelScreen extends StatefulWidget {
   const MainPanelScreen({super.key});
@@ -25,8 +23,7 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.dark,
       ),
     );
   }
@@ -57,205 +54,227 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
     }
   """;
 
-  void _navigateToSubjects(BuildContext context) => Navigator.pushNamed(context, '/enabled-subjects');
-  void _navigateToSlip(BuildContext context) => Navigator.pushNamed(context, '/enrollment-slip');
-  void _navigateToBlocks(BuildContext context) => Navigator.pushNamed(context, '/blocked-status');
-
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<RegistrationProvider>();
     final studentRegister = provider.studentRegister;
-    final isLarge = Responsive.isTabletOrDesktop(context);
 
     if (studentRegister == null) {
-      return const Scaffold(body: Center(child: Text('No se ha proporcionado un registro.')));
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.person_off_outlined, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text('No se ha proporcionado un registro o la sesión se ha reiniciado.', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.login),
+                label: const Text('Volver al Inicio de Sesión'),
+                onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
-    return Scaffold(
-      backgroundColor: isLarge ? Theme.of(context).scaffoldBackgroundColor : Theme.of(context).scaffoldBackgroundColor,
-      floatingActionButton: FloatingActionButton(
-        mini: true,
-        tooltip: 'Cambiar modo oscuro',
-        backgroundColor: UAGRMTheme.primaryBlue,
-        onPressed: () => context.read<ThemeProvider>().toggle(),
-        child: Consumer<ThemeProvider>(
-          builder: (_, tp, _) => Icon(
-            tp.isDark ? Icons.light_mode : Icons.dark_mode,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: Query(
-          options: QueryOptions(
-            document: gql(getPanelQuery),
-            variables: {
-              'registro': studentRegister,
-              'codigoCarrera': provider.selectedCareer?.code,
-            },
-            fetchPolicy: FetchPolicy.networkOnly,
-          ),
-          builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
-            if (result.hasException) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, color: UAGRMTheme.errorRed, size: 48),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error al cargar panel:\n${result.exception.toString()}',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(onPressed: refetch, child: const Text('Reintentar')),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Volver al inicio'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            if (result.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final data = result.data?['panelEstudiante'];
-            if (data == null) {
-              return const Center(child: Text('No se encontraron datos para este estudiante.'));
-            }
-
-            final student = Student.fromJson(data);
-            final optionsJson = data['opcionesDisponibles'] ?? {};
-            final periodJson = data['periodoActual'];
-            final options = PanelOptions.fromJson(optionsJson, periodJson);
-
-            return Column(
-              children: [
-                StudentInfoHeader(student: student),
-                Expanded(
-                  child: isLarge
-                      ? _buildLargeGrid(context, options)
-                      : _buildMobileGrid(context, options),
-                ),
-              ],
-            );
+    return MainLayout(
+      currentRoute: '/panel',
+      title: 'Dashboard',
+      subtitle: 'Panel › Inicio',
+      child: Query(
+        options: QueryOptions(
+          document: gql(getPanelQuery),
+          variables: {
+            'registro': studentRegister,
+            'codigoCarrera': provider.selectedCareer?.code,
           },
+          fetchPolicy: FetchPolicy.networkOnly,
         ),
+        builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
+          if (result.hasException) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: UAGRMTheme.errorRed, size: 48),
+                  const SizedBox(height: 16),
+                  Text('Error al cargar panel:\n\${result.exception.toString()}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(onPressed: refetch, child: const Text('Reintentar')),
+                ],
+              ),
+            );
+          }
+
+          if (result.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final data = result.data?['panelEstudiante'];
+          if (data == null) {
+            return const Center(child: Text('No se encontraron datos.'));
+          }
+
+          final student = Student.fromJson(data);
+          final optionsJson = data['opcionesDisponibles'] ?? {};
+          final periodJson = data['periodoActual'];
+          final options = PanelOptions.fromJson(optionsJson, periodJson);
+
+          return _buildDashboardContent(context, student, options);
+        },
       ),
     );
   }
 
-  Widget _buildLargeGrid(BuildContext context, PanelOptions options) {
-    final columns = Responsive.isDesktop(context) ? 3 : 3;
-    final maxWidth = Responsive.isDesktop(context) ? 900.0 : 700.0;
-
+  Widget _buildDashboardContent(BuildContext context, Student student, PanelOptions options) {
     return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(Responsive.horizontalPadding(context)),
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Mensaje de Bienvenida
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Bienvenido, ${student.fullName.split(' ')[0]}",
+                style: GoogleFonts.outfit(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: UAGRMTheme.textDark,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                student.career,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+
+          // Grid de Acciones - Solo se incluyen los existentes
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: Responsive.isDesktop(context) ? 4 : (Responsive.isTablet(context) ? 2 : 1),
+            crossAxisSpacing: 24,
+            mainAxisSpacing: 24,
+            childAspectRatio: 1.4,
+            children: [
+              _DashboardCard(
+                icon: Icons.edit_calendar_outlined,
+                title: 'Registrar Materias',
+                description: 'Inscribir, adicionar o retirar materias',
+                isAvailable: options.enrollment,
+                onTap: () => Navigator.pushReplacementNamed(context, '/enrollment'),
+              ),
+              _DashboardCard(
+                icon: Icons.checklist_rtl,
+                title: 'Materias Habilitadas',
+                description: 'Ver materias disponibles para inscripción',
+                isAvailable: options.enabledSubjects,
+                onTap: () => Navigator.pushReplacementNamed(context, '/enabled-subjects'),
+              ),
+              _DashboardCard(
+                icon: Icons.calendar_today_outlined,
+                title: 'Fecha/Hora Inscripción',
+                description: 'Consultar fechas asignadas',
+                isAvailable: options.inscriptionDates,
+                onTap: () => Navigator.pushReplacementNamed(context, '/enrollment-dates'),
+              ),
+              _DashboardCard(
+                icon: Icons.description_outlined,
+                title: 'Boleta de Inscripción',
+                description: 'Ver e imprimir boleta',
+                isAvailable: true,
+                onTap: () => Navigator.pushReplacementNamed(context, '/enrollment-slip'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DashboardCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final bool isAvailable;
+  final VoidCallback onTap;
+
+  const _DashboardCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.isAvailable,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: isAvailable ? onTap : null,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(24),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 3,
-                    height: 18,
-                    margin: const EdgeInsets.only(right: 10),
-                    decoration: BoxDecoration(
-                      color: UAGRMTheme.primaryBlue,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Text(
-                    'Gestión Académica',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleLarge?.color ?? UAGRMTheme.textDark,
-                    ),
-                  ),
-                ],
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isAvailable ? const Color(0xFFF1F5F9) : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: isAvailable ? UAGRMTheme.primaryBlue : Colors.grey,
+                size: 24,
               ),
             ),
-
-            WebCenteredLayout(
-              maxWidth: maxWidth,
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: columns,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.6,
-                children: _buildOptionButtons(context, options),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isAvailable ? const Color(0xFF1E293B) : Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 12,
+                color: isAvailable ? const Color(0xFF64748B) : Colors.grey.shade400,
               ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildMobileGrid(BuildContext context, PanelOptions options) {
-    return GridView.count(
-      padding: const EdgeInsets.all(16),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.1,
-      children: _buildOptionButtons(context, options),
-    );
-  }
-
-  List<Widget> _buildOptionButtons(BuildContext context, PanelOptions options) {
-    return [
-      OptionButton(
-        icon: Icons.calendar_month,
-        title: 'Fechas de Inscripción',
-        isAvailable: options.inscriptionDates,
-        onTap: () => Navigator.pushNamed(context, '/enrollment-dates'),
-      ),
-      OptionButton(
-        icon: Icons.lock_outline,
-        title: 'Bloqueo',
-        isAvailable: true,
-        hasBadge: options.blocked,
-        badgeText: '!',
-        onTap: () => _navigateToBlocks(context),
-      ),
-      OptionButton(
-        icon: Icons.book_outlined,
-        title: 'Materias Habilitadas',
-        isAvailable: options.enabledSubjects,
-        onTap: () => _navigateToSubjects(context),
-      ),
-      OptionButton(
-        icon: Icons.description_outlined,
-        title: 'Boleta',
-        isAvailable: true,
-        onTap: () => _navigateToSlip(context),
-      ),
-      OptionButton(
-        icon: Icons.app_registration,
-        title: 'Inscripción',
-        isAvailable: options.enrollment,
-        onTap: () => Navigator.pushNamed(context, '/enrollment'),
-      ),
-      OptionButton(
-        icon: Icons.info_outline,
-        title: 'No disponible',
-        isAvailable: false,
-        onTap: () {},
-      ),
-    ];
   }
 }

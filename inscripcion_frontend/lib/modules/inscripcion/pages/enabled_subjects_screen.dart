@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/models/subject.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/services/registration_provider.dart';
-import 'package:inscripcion_frontend/modules/inscripcion/widgets/web_page_header.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/widgets/main_layout.dart';
 
 class EnabledSubjectsScreen extends StatelessWidget {
   const EnabledSubjectsScreen({super.key});
@@ -29,32 +29,13 @@ class EnabledSubjectsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<RegistrationProvider>();
     final studentRegister = provider.studentRegister;
-
     final bool isTabletOrDesktop = Responsive.isTabletOrDesktop(context);
-    if (isTabletOrDesktop) {
-      return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              WebPageHeader(
-                title: 'Materias Habilitadas',
-                icon: Icons.book_outlined,
-                subtitle: 'Materias disponibles para inscripción este periodo',
-              ),
-              Expanded(
-                child: _buildQuery(context, provider, studentRegister, isWeb: isTabletOrDesktop),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Materias Habilitadas'), centerTitle: true),
-      body: _buildQuery(context, provider, studentRegister, isWeb: isTabletOrDesktop),
+    return MainLayout(
+      currentRoute: '/enabled-subjects',
+      title: 'Materias Habilitadas',
+      subtitle: 'Panel › Materias Habilitadas',
+      child: _buildQuery(context, provider, studentRegister, isWeb: isTabletOrDesktop),
     );
   }
 

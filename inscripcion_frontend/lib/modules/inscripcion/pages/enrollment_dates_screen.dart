@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
-import 'package:inscripcion_frontend/modules/inscripcion/widgets/web_page_header.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/widgets/main_layout.dart';
 import 'package:inscripcion_frontend/shared/utils/responsive_helper.dart';
 
 class EnrollmentDatesScreen extends StatefulWidget {
@@ -52,73 +52,18 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
     final isLarge = Responsive.isTabletOrDesktop(context);
     final content = _buildContent(isLarge);
 
-    if (isLarge) {
-      return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              WebPageHeader(
-                title: 'Fechas de Inscripción',
-                icon: Icons.calendar_month_outlined,
-                subtitle: 'Consulta los periodos y fechas habilitadas para inscripción',
-              ),
-              Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: Responsive.isDesktop(context) ? 800 : 640,
-                    ),
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.all(Responsive.horizontalPadding(context)),
-                      child: content,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+    return MainLayout(
+      currentRoute: '/enrollment-dates',
+      title: 'Fechas de Inscripción',
+      subtitle: 'Panel › Fechas de Inscripción',
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: Responsive.isDesktop(context) ? 800 : 640,
           ),
-        ),
-      );
-    }
-
-    // Móvil: diseño original
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fechas de Inscripción'),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [UAGRMTheme.primaryBlue, Color(0xFF1565C0)],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Column(
-                    children: [
-                      Icon(Icons.calendar_month, size: 48, color: Colors.white),
-                      SizedBox(height: 8),
-                      Text(
-                        'Periodos de Inscripción',
-                        style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                content,
-              ],
-            ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(Responsive.horizontalPadding(context)),
+            child: content,
           ),
         ),
       ),

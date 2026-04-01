@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/services/registration_provider.dart';
 import 'package:inscripcion_frontend/shared/utils/time_formatter.dart';
-import 'package:inscripcion_frontend/modules/inscripcion/widgets/web_page_header.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/widgets/main_layout.dart';
 
 class EnrollmentScreen extends StatefulWidget {
   const EnrollmentScreen({super.key});
@@ -169,48 +169,18 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
     final studentRegister = provider.studentRegister;
     final codigoCarrera = provider.selectedCareer?.code;
 
-    final bool isTabletOrDesktop = Responsive.isTabletOrDesktop(context);
-    if (isTabletOrDesktop) {
-      return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              WebPageHeader(
-                title: 'Inscripción',
-                icon: Icons.app_registration,
-                subtitle: 'Selecciona y confirma tus materias para este periodo',
+    return MainLayout(
+      currentRoute: '/enrollment',
+      title: 'Inscripción',
+      subtitle: 'Selecciona y confirma tus materias para este periodo',
+      child: selectedPeriod == null
+          ? _buildWebPeriodSelection()
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000),
+                child: _buildEnrollmentFlow(studentRegister ?? '', codigoCarrera ?? ''),
               ),
-              Expanded(
-                child: selectedPeriod == null
-                    ? _buildWebPeriodSelection()
-                    : Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1000),
-                          child: _buildEnrollmentFlow(studentRegister ?? '', codigoCarrera ?? ''),
-                        ),
-                      ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inscripción'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SafeArea(
-        child: selectedPeriod == null
-            ? _buildPeriodSelection()
-            : _buildEnrollmentFlow(studentRegister ?? '', codigoCarrera ?? ''),
-      ),
+            ),
     );
   }
 
@@ -297,57 +267,7 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
   }
 
 
-  Widget _buildPeriodSelection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [UAGRMTheme.primaryBlue, Color(0xFF1565C0)],
-            ),
-          ),
-          child: const Column(
-            children: [
-              Icon(Icons.app_registration, size: 48, color: Colors.white),
-              SizedBox(height: 8),
-              Text(
-                'Selecciona el Periodo',
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: periods.length,
-            itemBuilder: (context, index) {
-              final period = periods[index];
-              final periodName = period['nombre'] ?? '';
-              final isActive = period['activo'] ?? false;
-              return Card(
-                elevation: 4,
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(16),
-                  leading: const Icon(Icons.calendar_today, color: UAGRMTheme.primaryBlue),
-                  title: Text(periodName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  subtitle: Text(
-                    isActive ? 'Activo' : 'Inactivo',
-                    style: TextStyle(color: isActive ? UAGRMTheme.successGreen : UAGRMTheme.textGrey),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: isActive ? () => setState(() => selectedPeriod = periodName) : null,
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildEnrollmentFlow(String registro, String codigoCarrera) {
     return Column(

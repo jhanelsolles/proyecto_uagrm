@@ -52,15 +52,31 @@ class UAGRMApp extends StatelessWidget {
             darkTheme: UAGRMTheme.darkThemeData,
             themeMode: themeProvider.themeMode,
             initialRoute: '/',
-            routes: {
-              '/': (context) => const LoginScreen(),
-              '/career': (context) => const CareerSelectionScreen(),
-              '/panel': (context) => const MainPanelScreen(),
-              '/enabled-subjects': (context) => const EnabledSubjectsScreen(),
-              '/enrollment-slip': (context) => const EnrollmentSlipScreen(),
-              '/blocked-status': (context) => const BlockedStatusScreen(),
-              '/enrollment': (context) => const EnrollmentScreen(),
-              '/enrollment-dates': (context) => const EnrollmentDatesScreen(),
+            onGenerateRoute: (settings) {
+              Widget page;
+              switch (settings.name) {
+                case '/': page = const LoginScreen(); break;
+                case '/career': page = const CareerSelectionScreen(); break;
+                case '/panel': page = const MainPanelScreen(); break;
+                case '/enabled-subjects': page = const EnabledSubjectsScreen(); break;
+                case '/enrollment-slip': page = const EnrollmentSlipScreen(); break;
+                case '/blocked-status': page = const BlockedStatusScreen(); break;
+                case '/enrollment': page = const EnrollmentScreen(); break;
+                case '/enrollment-dates': page = const EnrollmentDatesScreen(); break;
+                default: page = const LoginScreen();
+              }
+
+              return PageRouteBuilder(
+                settings: settings,
+                pageBuilder: (context, animation, secondaryAnimation) => page,
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 150),
+              );
             },
           ),
         ),
