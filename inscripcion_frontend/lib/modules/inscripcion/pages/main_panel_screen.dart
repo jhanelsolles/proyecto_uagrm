@@ -130,8 +130,11 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
   }
 
   Widget _buildDashboardContent(BuildContext context, Student student, PanelOptions options) {
+    final isDesktop = Responsive.isDesktop(context);
+    final isMobile = !isDesktop && !Responsive.isTablet(context);
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -142,7 +145,7 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
               Text(
                 "Bienvenido, ${student.fullName.split(' ')[0]}",
                 style: GoogleFonts.outfit(
-                  fontSize: 32,
+                  fontSize: isMobile ? 24 : 32,
                   fontWeight: FontWeight.bold,
                   color: UAGRMTheme.textDark,
                 ),
@@ -150,23 +153,23 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
               const SizedBox(height: 4),
               Text(
                 student.career,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF64748B),
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 16,
+                  color: const Color(0xFF64748B),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 32),
 
-          // Grid de Acciones - Solo se incluyen los existentes
+          // Grid de Acciones
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: Responsive.isDesktop(context) ? 4 : (Responsive.isTablet(context) ? 2 : 1),
-            crossAxisSpacing: 24,
-            mainAxisSpacing: 24,
-            childAspectRatio: 1.4,
+            crossAxisCount: isDesktop ? 4 : (isMobile ? 1 : 2),
+            crossAxisSpacing: isMobile ? 16 : 24,
+            mainAxisSpacing: isMobile ? 16 : 24,
+            childAspectRatio: isMobile ? 2.8 : 1.4,
             children: [
               _DashboardCard(
                 icon: Icons.edit_calendar_outlined,
@@ -221,6 +224,8 @@ class _DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = !Responsive.isDesktop(context) && !Responsive.isTablet(context);
+
     return InkWell(
       onTap: isAvailable ? onTap : null,
       borderRadius: BorderRadius.circular(16),
@@ -238,13 +243,13 @@ class _DashboardCard extends StatelessWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(isMobile ? 16 : 24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(isMobile ? 8 : 10),
               decoration: BoxDecoration(
                 color: isAvailable ? const Color(0xFFF1F5F9) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(10),
@@ -252,14 +257,14 @@ class _DashboardCard extends StatelessWidget {
               child: Icon(
                 icon,
                 color: isAvailable ? UAGRMTheme.primaryBlue : Colors.grey,
-                size: 24,
+                size: isMobile ? 22 : 24,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isMobile ? 12 : 16),
             Text(
               title,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: isMobile ? 14 : 16,
                 fontWeight: FontWeight.bold,
                 color: isAvailable ? const Color(0xFF1E293B) : Colors.grey,
               ),
@@ -268,9 +273,11 @@ class _DashboardCard extends StatelessWidget {
             Text(
               description,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: isMobile ? 11 : 12,
                 color: isAvailable ? const Color(0xFF64748B) : Colors.grey.shade400,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

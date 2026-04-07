@@ -105,8 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Móvil: columna única; Tablet + Escritorio: dos columnas
-    if (Responsive.isMobile(context)) return _buildMobileLayout();
+    // Pantallas menores a escritorio (móviles y tablets): columna única
+    if (!Responsive.isDesktop(context)) return _buildMobileLayout();
     return _buildWideLayout();
   }
 

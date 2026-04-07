@@ -117,9 +117,11 @@ class MainLayout extends StatelessWidget {
       child: Row(
         children: [
           if (!isDesktop)
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => Scaffold.of(context).openDrawer(),
+            Builder(
+              builder: (ctx) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(ctx).openDrawer(),
+              ),
             ),
           Expanded(
             child: Column(

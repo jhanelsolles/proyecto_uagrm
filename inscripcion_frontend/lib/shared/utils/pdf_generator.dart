@@ -31,15 +31,15 @@ class PdfGenerator {
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(32),
+        margin: const pw.EdgeInsets.all(20),
         build: (pw.Context context) {
           return [
             _buildHeader(nombrePeriodo),
-            pw.SizedBox(height: 24),
+            pw.SizedBox(height: 12),
             _buildStudentInfo(estudiante, carreraNombre, carreraCodigo),
-            pw.SizedBox(height: 24),
+            pw.SizedBox(height: 12),
             isGraphical ? _buildGraphicalTable(materias) : _buildNormalTable(materias),
-            pw.SizedBox(height: 24),
+            pw.SizedBox(height: 12),
             _buildSummary(materias.length, totalCreditos),
           ];
         },
@@ -76,7 +76,7 @@ class PdfGenerator {
   static pw.Widget _buildStudentInfo(
       Map<String, dynamic> estudiante, String carreraNombre, String carreraCodigo) {
     return pw.Container(
-      padding: const pw.EdgeInsets.all(16),
+      padding: const pw.EdgeInsets.all(10),
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: PdfColors.grey400),
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
@@ -174,11 +174,11 @@ class PdfGenerator {
       pw.TableRow(
         decoration: pw.BoxDecoration(color: PdfColor.fromHex('#003366')), // Azul UAGRM
         children: headers.map((h) => pw.Container(
-          height: 25,
+          height: 20,
           alignment: pw.Alignment.center,
           child: pw.Text(
             h, 
-            style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 9),
+            style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 8),
             textAlign: pw.TextAlign.center,
           ),
         )).toList(),
@@ -192,13 +192,13 @@ class PdfGenerator {
       final rowChildren = <pw.Widget>[
         // Columna de hora
         pw.Container(
-          height: 35,
+          height: 30, // Reducido de 35
           alignment: pw.Alignment.topCenter,
-          padding: const pw.EdgeInsets.only(top: 4, right: 4),
+          padding: const pw.EdgeInsets.only(top: 2, right: 4),
           decoration: const pw.BoxDecoration(
             border: pw.Border(right: pw.BorderSide(color: PdfColors.grey300, width: 0.5)),
           ),
-          child: pw.Text(hourStr, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
+          child: pw.Text(hourStr, style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey600)),
         ),
       ];
 
@@ -208,7 +208,7 @@ class PdfGenerator {
         if (ev == null) {
           // Celda vacía
           rowChildren.add(pw.Container(
-            height: 35,
+            height: 30, // Reducido de 35
             decoration: const pw.BoxDecoration(
               border: pw.Border(
                 bottom: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
@@ -222,7 +222,7 @@ class PdfGenerator {
           final isLast = (row == 14 || grid[row + 1][col]?.codigo != ev.codigo);
 
           rowChildren.add(pw.Container(
-            height: 35,
+            height: 30, // Reducido de 35
             decoration: const pw.BoxDecoration(
               border: pw.Border(
                 right: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
@@ -345,7 +345,7 @@ class PdfGenerator {
 
   static pw.Widget _buildSummary(int totalMaterias, int totalCreditos) {
     return pw.Container(
-      padding: const pw.EdgeInsets.all(16),
+      padding: const pw.EdgeInsets.all(10),
       decoration: pw.BoxDecoration(
         color: PdfColors.grey100,
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),

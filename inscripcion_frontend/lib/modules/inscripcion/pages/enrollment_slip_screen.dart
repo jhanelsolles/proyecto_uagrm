@@ -107,55 +107,111 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
   }
 
   Widget _buildPeriodAndTabSelector(String registro, bool isDesktop) {
+    if (isDesktop) {
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        child: Row(
+          children: [
+            _buildHistorialSelector(registro),
+            const Spacer(),
+            _buildViewTabs(),
+          ],
+        ),
+      );
+    }
+
+    // Diseño para Móviles (Evitar desbordamiento)
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Text('Historial:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: UAGRMTheme.textDark)),
-              const SizedBox(width: 12),
-              Query(
-                options: QueryOptions(
-                  document: gql(getHistoricalPeriodsQuery),
-                  variables: {'registro': registro},
-                  fetchPolicy: FetchPolicy.cacheFirst,
-                ),
-                builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
-                  final periods = (result.data?['historialPeriodosEstudiante'] as List<dynamic>?) ?? [];
-                  return DropdownButton<String?>(
-                    value: selectedPeriodCodigo,
-                    underline: const SizedBox.shrink(),
-                    isDense: true,
-                    hint: const Text('Actual', style: TextStyle(fontSize: 13)),
-                    items: [
-                      const DropdownMenuItem<String?>(value: null, child: Text('Actual', style: TextStyle(fontSize: 13))),
-                      ...periods.map((p) => DropdownMenuItem<String?>(
-                        value: p['codigo']?.toString(),
-                        child: Text(p['nombre']?.toString() ?? p['codigo']?.toString() ?? '', style: const TextStyle(fontSize: 13)),
-                      )),
-                    ],
-                    onChanged: (val) => setState(() => selectedPeriodCodigo = val),
-                  );
-                },
-              ),
-            ],
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(30),
-            ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildTabButton('Boleta Normal', !_isGraphicalView),
-                _buildTabButton('Boleta Gráfica', _isGraphicalView),
+                _buildHistorialSelector(registro),
+                const SizedBox(width: 16),
+                _buildOpcionesSelector(),
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          _buildViewTabs(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistorialSelector(String registro) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text('Historial:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: UAGRMTheme.textDark)),
+        const SizedBox(width: 12),
+        Query(
+          options: QueryOptions(
+            document: gql(getHistoricalPeriodsQuery),
+            variables: {'registro': registro},
+            fetchPolicy: FetchPolicy.cacheFirst,
+          ),
+          builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
+            final periods = (result.data?['historialPeriodosEstudiante'] as List<dynamic>?) ?? [];
+            return DropdownButton<String?>(
+              value: selectedPeriodCodigo,
+              underline: const SizedBox.shrink(),
+              isDense: true,
+              hint: const Text('Actual', style: TextStyle(fontSize: 13)),
+              items: [
+                const DropdownMenuItem<String?>(value: null, child: Text('Actual', style: TextStyle(fontSize: 13))),
+                ...periods.map((p) => DropdownMenuItem<String?>(
+                  value: p['codigo']?.toString(),
+                  child: Text(p['nombre']?.toString() ?? p['codigo']?.toString() ?? '', style: const TextStyle(fontSize: 13)),
+                )),
+              ],
+              onChanged: (val) => setState(() => selectedPeriodCodigo = val),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOpcionesSelector() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text('Opciones:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: UAGRMTheme.textDark)),
+        const SizedBox(width: 12),
+        DropdownButton<String?>(
+          value: null,
+          underline: const SizedBox.shrink(),
+          isDense: true,
+          hint: const Text('Config', style: TextStyle(fontSize: 13)),
+          items: const [
+            DropdownMenuItem<String?>(value: 'opt1', child: Text('Descargar', style: TextStyle(fontSize: 13))),
+            DropdownMenuItem<String?>(value: 'opt2', child: Text('Compartir', style: TextStyle(fontSize: 13))),
+          ],
+          onChanged: (val) {},
+        ),
+      ],
+    );
+  }
+
+  Widget _buildViewTabs() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildTabButton('Boleta Normal', !_isGraphicalView),
+          _buildTabButton('Boleta Gráfica', _isGraphicalView),
         ],
       ),
     );
