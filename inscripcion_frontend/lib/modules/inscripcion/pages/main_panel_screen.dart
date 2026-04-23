@@ -49,6 +49,10 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
           bloqueo
           boleta
           inscripcion
+          transacciones
+          maestroOfertas
+          pagos
+          calendarioAcademico
         }
       }
     }
@@ -60,23 +64,11 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
     final studentRegister = provider.studentRegister;
 
     if (studentRegister == null) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.person_off_outlined, size: 64, color: Colors.grey),
-              const SizedBox(height: 16),
-              const Text('No se ha proporcionado un registro o la sesión se ha reiniciado.', style: TextStyle(fontSize: 16)),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.login),
-                label: const Text('Volver al Inicio de Sesión'),
-                onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
-              ),
-            ],
-          ),
-        ),
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -161,15 +153,56 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
             ],
           ),
           const SizedBox(height: 32),
+          
+          // Tarjetas de Resumen
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 3, // Siempre 3 columnas en horizontal
+            crossAxisSpacing: isMobile ? 8 : 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: isMobile ? 0.95 : (isDesktop ? 3.5 : 3.0),
+            children: [
+              _StatusSummaryCard(
+                title: 'Semestre Actual',
+                value: student.semester,
+                icon: Icons.trending_up,
+                accentColor: UAGRMTheme.primaryBlue,
+              ),
+              _StatusSummaryCard(
+                title: 'Modalidad',
+                value: student.modality,
+                icon: Icons.menu_book_outlined,
+                accentColor: UAGRMTheme.secondaryBlue,
+              ),
+              _StatusSummaryCard(
+                title: 'Estado',
+                value: student.status,
+                icon: Icons.verified_user_outlined,
+                accentColor: UAGRMTheme.successGreen,
+                isStatus: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
 
           // Grid de Acciones
+          Text(
+            'Opciones Disponibles',
+            style: GoogleFonts.outfit(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: UAGRMTheme.textDark,
+            ),
+          ),
+          const SizedBox(height: 16),
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: isDesktop ? 4 : (isMobile ? 1 : 2),
-            crossAxisSpacing: isMobile ? 16 : 24,
-            mainAxisSpacing: isMobile ? 16 : 24,
-            childAspectRatio: isMobile ? 2.8 : 1.4,
+            crossAxisSpacing: isMobile ? 12 : 20,
+            mainAxisSpacing: isMobile ? 12 : 20,
+            childAspectRatio: isMobile ? 3.2 : 1.4,
             children: [
               _DashboardCard(
                 icon: Icons.edit_calendar_outlined,
@@ -196,8 +229,36 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
                 icon: Icons.description_outlined,
                 title: 'Boleta de Inscripción',
                 description: 'Ver e imprimir boleta',
-                isAvailable: true,
+                isAvailable: options.enrollmentSlips,
                 onTap: () => Navigator.pushReplacementNamed(context, '/enrollment-slip'),
+              ),
+              _DashboardCard(
+                icon: Icons.paid_outlined,
+                title: 'Transacciones',
+                description: 'Historial de movimientos',
+                isAvailable: options.transactions,
+                onTap: () => Navigator.pushReplacementNamed(context, '/transactions'),
+              ),
+              _DashboardCard(
+                icon: Icons.grid_view_outlined,
+                title: 'Maestro de Ofertas',
+                description: 'Ver maestros de ofertas',
+                isAvailable: options.masterOffers,
+                onTap: () => Navigator.pushReplacementNamed(context, '/offers'),
+              ),
+              _DashboardCard(
+                icon: Icons.calendar_month_outlined,
+                title: 'Calendario Académico',
+                description: 'Ver eventos y fechas importantes',
+                isAvailable: options.academicCalendar,
+                onTap: () => Navigator.pushReplacementNamed(context, '/calendar'),
+              ),
+              _DashboardCard(
+                icon: Icons.credit_card_outlined,
+                title: 'Pagos',
+                description: 'Sistema de pagos UAGRM',
+                isAvailable: options.payments,
+                onTap: () => Navigator.pushReplacementNamed(context, '/payments'),
               ),
             ],
           ),
@@ -207,7 +268,145 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
   }
 }
 
-class _DashboardCard extends StatelessWidget {
+class _StatusSummaryCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final bool isStatus;
+  final Color accentColor;
+
+  const _StatusSummaryCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.accentColor,
+    this.isStatus = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = Responsive.isMobile(context);
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            UAGRMTheme.primaryBlue,
+            UAGRMTheme.primaryBlue.withValues(alpha: 0.9),
+            const Color(0xFF0D47A1), // Azul más profundo
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12), // Un poco más pequeño para móvil
+        boxShadow: [
+          BoxShadow(
+            color: UAGRMTheme.primaryBlue.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          borderRadius: BorderRadius.circular(12),
+          splashColor: Colors.white10,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 12 : 24, 
+              vertical: isMobile ? 12 : 12
+            ),
+            child: isMobile 
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      icon,
+                      color: Colors.white.withValues(alpha: 0.9),
+                      size: 20,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 9,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isStatus 
+                          ? (value.toUpperCase() == 'ACTIVO' ? const Color(0xFF4ADE80) : Colors.orangeAccent)
+                          : Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            value,
+                            style: GoogleFonts.outfit(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: isStatus 
+                                ? (value.toUpperCase() == 'ACTIVO' ? const Color(0xFF4ADE80) : Colors.orangeAccent)
+                                : Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                  ],
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardCard extends StatefulWidget {
   final IconData icon;
   final String title;
   final String description;
@@ -223,63 +422,102 @@ class _DashboardCard extends StatelessWidget {
   });
 
   @override
+  State<_DashboardCard> createState() => _DashboardCardState();
+}
+
+class _DashboardCardState extends State<_DashboardCard> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final isMobile = !Responsive.isDesktop(context) && !Responsive.isTablet(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return InkWell(
-      onTap: isAvailable ? onTap : null,
+      onTap: widget.isAvailable ? widget.onTap : null,
+      onHover: (value) => setState(() => _isHovered = value),
+      onHighlightChanged: (value) => setState(() => _isHovered = value),
       borderRadius: BorderRadius.circular(16),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white, width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+      splashColor: UAGRMTheme.primaryBlue.withValues(alpha: 0.1),
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 300),
+        scale: _isHovered ? 1.04 : 1.0,
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: isDark ? UAGRMTheme.darkSurface : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: _isHovered 
+                  ? UAGRMTheme.primaryBlue.withValues(alpha: 0.5) 
+                  : (isDark ? Colors.white10 : Colors.transparent), 
+              width: 1.5
             ),
-          ],
-        ),
-        padding: EdgeInsets.all(isMobile ? 16 : 24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.all(isMobile ? 8 : 10),
-              decoration: BoxDecoration(
-                color: isAvailable ? const Color(0xFFF1F5F9) : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: _isHovered 
+                    ? UAGRMTheme.primaryBlue.withValues(alpha: 0.1) 
+                    : Colors.black.withValues(alpha: 0.03),
+                blurRadius: _isHovered ? 20 : 10,
+                offset: Offset(0, _isHovered ? 8 : 4),
               ),
-              child: Icon(
-                icon,
-                color: isAvailable ? UAGRMTheme.primaryBlue : Colors.grey,
-                size: isMobile ? 22 : 24,
+            ],
+          ),
+          padding: EdgeInsets.all(isMobile ? 16 : 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.all(isMobile ? 8 : 10),
+                decoration: BoxDecoration(
+                  color: widget.isAvailable 
+                      ? (_isHovered ? UAGRMTheme.primaryBlue : const Color(0xFFF1F5F9)) 
+                      : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: _isHovered ? [
+                    BoxShadow(
+                      color: UAGRMTheme.primaryBlue.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ] : [],
+                ),
+                child: Icon(
+                  widget.icon,
+                  color: widget.isAvailable 
+                      ? (_isHovered ? Colors.white : UAGRMTheme.primaryBlue) 
+                      : Colors.grey,
+                  size: isMobile ? 22 : 24,
+                ),
               ),
-            ),
-            SizedBox(height: isMobile ? 12 : 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: isMobile ? 14 : 16,
-                fontWeight: FontWeight.bold,
-                color: isAvailable ? const Color(0xFF1E293B) : Colors.grey,
+              SizedBox(height: isMobile ? 12 : 12),
+              Text(
+                widget.title,
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 16,
+                  fontWeight: FontWeight.bold,
+                  color: widget.isAvailable 
+                      ? (isDark ? Colors.white : const Color(0xFF1E293B)) 
+                      : Colors.grey,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              description,
-              style: TextStyle(
-                fontSize: isMobile ? 11 : 12,
-                color: isAvailable ? const Color(0xFF64748B) : Colors.grey.shade400,
+              const SizedBox(height: 4),
+              Text(
+                widget.description,
+                style: TextStyle(
+                  fontSize: isMobile ? 11 : 12,
+                  color: widget.isAvailable 
+                      ? (isDark ? Colors.white60 : const Color(0xFF64748B)) 
+                      : Colors.grey.shade400,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

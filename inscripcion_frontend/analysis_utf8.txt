@@ -1,4 +1,0 @@
-﻿Analyzing inscripcion_frontend...                               
-
-  error - The named parameter 'border' isn't defined - lib\modules\inscripcion\pages\enrollment_slip_screen.dart:374:82 - undefined_named_parameter
-

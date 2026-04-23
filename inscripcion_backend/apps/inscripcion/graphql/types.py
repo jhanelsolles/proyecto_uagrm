@@ -3,13 +3,23 @@ from graphene_django import DjangoObjectType
 from apps.inscripcion.models import (
     Carrera, PlanEstudios, Materia, MateriaCarreraSemestre,
     Estudiante, EstudianteCarrera, PeriodoAcademico, Inscripcion, 
-    InscripcionMateria, Bloqueo, OfertaMateria
+    InscripcionMateria, Bloqueo, OfertaMateria, EventoCalendario
 )
 
 class CarreraType(DjangoObjectType):
     class Meta:
         model = Carrera
         fields = '__all__'
+
+class EventoCalendarioType(DjangoObjectType):
+    tipo_display = graphene.String()
+
+    class Meta:
+        model = EventoCalendario
+        fields = '__all__'
+    
+    def resolve_tipo_display(self, info):
+        return self.get_tipo_display()
 
 class PlanEstudiosType(DjangoObjectType):
     class Meta:
@@ -48,6 +58,8 @@ class PeriodoAcademicoType(DjangoObjectType):
 
 class InscripcionType(DjangoObjectType):
     estudiante = graphene.Field('apps.inscripcion.graphql.types.EstudianteType')
+    tipo_proceso_display = graphene.String()
+    via_display = graphene.String()
     
     class Meta:
         model = Inscripcion
@@ -55,6 +67,12 @@ class InscripcionType(DjangoObjectType):
         
     def resolve_estudiante(self, info):
         return self.estudiante_carrera.estudiante
+
+    def resolve_tipo_proceso_display(self, info):
+        return self.get_tipo_proceso_display()
+    
+    def resolve_via_display(self, info):
+        return self.get_via_display()
 
 class InscripcionMateriaType(DjangoObjectType):
     class Meta:
@@ -72,6 +90,7 @@ class OfertaMateriaType(DjangoObjectType):
     carrera_nombre = graphene.String()
     cupos_disponibles = graphene.Int()
     semestre = graphene.Int()
+    turno_display = graphene.String()
     
     class Meta:
         model = OfertaMateria
@@ -91,6 +110,12 @@ class OfertaMateriaType(DjangoObjectType):
 
     def resolve_semestre(self, info):
         return self.materia_carrera.semestre
+
+    def resolve_turno_display(self, info):
+        display = self.get_turno_display()
+        if display == display.upper(): # Si viene todo en mayúsculas como "MAÑANA"
+            return display.capitalize()
+        return display
 
 
 # ========== TIPOS COMPUESTOS PARA RESPUESTAS ==========
@@ -127,6 +152,10 @@ class OpcionesDisponiblesType(graphene.ObjectType):
     boleta = graphene.Boolean()
     bloqueo = graphene.Boolean()
     inscripcion = graphene.Boolean()
+    transacciones = graphene.Boolean()
+    maestro_ofertas = graphene.Boolean()
+    pagos = graphene.Boolean()
+    calendario_academico = graphene.Boolean()
 
 
 class InscripcionInfoType(graphene.ObjectType):

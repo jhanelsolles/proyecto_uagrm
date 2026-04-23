@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Image.asset(
-                              'assets/images/image_0.jpeg',
+                              'assets/images/image_0.png',
                               fit: BoxFit.contain,
                               errorBuilder: (context, error, stackTrace) {
                                 return const Icon(Icons.school, size: 80, color: UAGRMTheme.primaryBlue);
@@ -288,7 +288,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Image.asset(
-                          'assets/images/image_0.jpeg',
+                          'assets/images/image_0.png',
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) {
                             return const Icon(Icons.school, size: 70, color: UAGRMTheme.primaryBlue);

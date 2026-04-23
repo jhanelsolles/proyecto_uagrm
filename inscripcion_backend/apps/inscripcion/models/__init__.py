@@ -23,6 +23,9 @@ from .inscripcion import OfertaMateria, Inscripcion, InscripcionMateria
 # Boletas y Pagos
 from .boleta import ConceptoPago, Boleta, DetalleBoleta
 
+# Calendario Académico
+from .calendar import EventoCalendario
+
 __all__ = [
     # Carrera
     'Carrera',
@@ -45,4 +48,6 @@ __all__ = [
     'ConceptoPago',
     'Boleta',
     'DetalleBoleta',
+    # Calendario
+    'EventoCalendario',
 ]

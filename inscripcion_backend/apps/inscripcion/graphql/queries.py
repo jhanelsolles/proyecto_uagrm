@@ -101,6 +101,24 @@ class Query(graphene.ObjectType):
     mis_registros = graphene.List(EstudianteType, registro=graphene.String(required=True))
     mis_carreras = graphene.List(EstudianteCarreraType, registro=graphene.String(required=True))
     fechas_inscripcion = graphene.List(FechasInscripcionType, registro=graphene.String(required=True))
+    
+    mis_transacciones = graphene.List(
+        InscripcionType, 
+        registro=graphene.String(required=True),
+        codigo_periodo=graphene.String()
+    )
+    
+    eventos_calendario = graphene.List(
+        'apps.inscripcion.graphql.types.EventoCalendarioType',
+        codigo_periodo=graphene.String()
+    )
+
+    def resolve_eventos_calendario(self, info, codigo_periodo=None):
+        from apps.inscripcion.models import EventoCalendario
+        queryset = EventoCalendario.objects.all()
+        if codigo_periodo:
+            queryset = queryset.filter(periodo__codigo=codigo_periodo)
+        return queryset
 
     def resolve_panel_estudiante(self, info, registro, codigo_carrera=None):
         return PanelService.get_panel_estudiante(registro, codigo_carrera)
@@ -194,4 +212,18 @@ class Query(graphene.ObjectType):
             'grupo': 'G1',
             'estado': inscripcion.estado
         }]
+
+    def resolve_mis_transacciones(self, info, registro, codigo_periodo=None):
+        from apps.inscripcion.models import Inscripcion
+        from apps.inscripcion.services.estudiante_service import EstudianteService
+        
+        estudiante = EstudianteService.get_by_registro(registro)
+        if not estudiante:
+            return []
+            
+        queryset = Inscripcion.objects.filter(estudiante_carrera__estudiante=estudiante)
+        if codigo_periodo:
+            queryset = queryset.filter(periodo_academico__codigo=codigo_periodo)
+            
+        return queryset.order_by('-fecha_inscripcion_realizada', '-fecha_inscripcion_asignada')
 

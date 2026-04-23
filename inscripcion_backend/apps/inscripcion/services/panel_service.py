@@ -118,18 +118,18 @@ class PanelService:
         """
         opciones = {
             'fechas_inscripcion': False,
-            'boleta': False,
+            'boleta': True, # Siempre habilitado para consulta de historial
             'bloqueo': False,
             'inscripcion': False,
+            'transacciones': True, # Siempre disponible para ver historial
+            'maestro_ofertas': True, # Siempre disponible para consulta
+            'pagos': True, # Siempre disponible
+            'calendario_academico': True, # Siempre disponible
         }
         
         # Fechas de inscripción disponibles si hay periodo activo
         if periodo_actual and periodo_actual.inscripciones_habilitadas:
             opciones['fechas_inscripcion'] = True
-        
-        # Boleta disponible si existe inscripción y está generada
-        if inscripcion and inscripcion.boleta_generada:
-            opciones['boleta'] = True
         
         # Información de bloqueo disponible si tiene bloqueos
         if tiene_bloqueos:
@@ -150,27 +150,65 @@ class PanelService:
         if not estudiante:
             return None
         
-        inscripcion = InscripcionService.get_boleta_estudiante(registro, codigo_carrera=codigo_carrera)
-        if not inscripcion:
+        carreras = EstudianteService.get_carreras_estudiante(registro)
+        est_carrera = carreras.filter(carrera__codigo=codigo_carrera).first() if codigo_carrera else carreras.first()
+        
+        if not est_carrera:
             return None
+
+        inscripcion = InscripcionService.get_boleta_estudiante(registro, codigo_carrera=codigo_carrera)
         
-        # Calcular totales
-        materias_inscritas = inscripcion.materias_inscritas.all()
-        total_creditos = sum(m.materia.creditos for m in materias_inscritas)
-        total_materias = materias_inscritas.count()
+        # Datos básicos
+        periodo_actual = PeriodoAcademicoService.get_periodo_habilitado_inscripcion()
         
-        # Construir lista de materias
         materias_data = []
-        for mat_inscrita in materias_inscritas:
-            materias_data.append({
-                'codigo': mat_inscrita.materia.codigo,
-                'nombre': mat_inscrita.materia.nombre,
-                'creditos': mat_inscrita.materia.creditos,
-                'grupo': mat_inscrita.grupo,
-                'semestre': mat_inscrita.oferta.materia_carrera.semestre if mat_inscrita.oferta else 0,
-                'horas_teoricas': mat_inscrita.materia.horas_teoricas,
-                'horas_practicas': mat_inscrita.materia.horas_practicas,
-            })
+        total_creditos = 0
+        total_materias = 0
+        numero_boleta = ""
+        fecha_generacion = None
+        estado = "SIN INSCRIPCIÓN"
+
+        if inscripcion:
+            # Calcular totales
+            materias_inscritas = inscripcion.materias_inscritas.all()
+            total_creditos = sum(m.materia.creditos for m in materias_inscritas)
+            total_materias = materias_inscritas.count()
+            numero_boleta = inscripcion.numero_boleta
+            fecha_generacion = inscripcion.fecha_inscripcion_realizada.isoformat() if inscripcion.fecha_inscripcion_realizada else None
+            estado = inscripcion.estado
+            
+            # Construir lista de materias
+            for mat_inscrita in materias_inscritas:
+                materias_data.append({
+                    'codigo': mat_inscrita.materia.codigo,
+                    'nombre': mat_inscrita.materia.nombre,
+                    'creditos': mat_inscrita.materia.creditos,
+                    'grupo': mat_inscrita.grupo,
+                    'semestre': mat_inscrita.oferta.materia_carrera.semestre if mat_inscrita.oferta else 0,
+                    'horas_teoricas': mat_inscrita.materia.horas_teoricas,
+                    'horas_practicas': mat_inscrita.materia.horas_practicas,
+                })
+        
+        return {
+            'estudiante': {
+                'registro': estudiante.registro,
+                'nombre_completo': estudiante.nombre_completo,
+            },
+            'carrera': {
+                'codigo': est_carrera.carrera.codigo,
+                'nombre': est_carrera.carrera.nombre,
+            },
+            'periodo': {
+                'codigo': periodo_actual.codigo if periodo_actual else "N/A",
+                'nombre': periodo_actual.nombre if periodo_actual else "Sin periodo activo",
+            },
+            'numero_boleta': numero_boleta,
+            'fecha_generacion': fecha_generacion,
+            'estado': estado,
+            'materias_inscritas': materias_data,
+            'total_creditos': total_creditos,
+            'total_materias': total_materias,
+        }
         
         return {
             'estudiante': {

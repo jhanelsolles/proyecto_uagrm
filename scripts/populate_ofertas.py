@@ -4,13 +4,13 @@ import random
 
 # Configurar el entorno de Django
 import sys
-project_root = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(project_root)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(project_root, 'inscripcion_backend'))
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inscripcion_backend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.base')
 django.setup()
 
-from inscripcion.models import (
+from apps.inscripcion.models import (
     Carrera, PlanEstudios, Materia, MateriaCarreraSemestre, 
     PeriodoAcademico, OfertaMateria
 )

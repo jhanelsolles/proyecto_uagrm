@@ -7,9 +7,16 @@ from .estudiante import EstudianteCarrera
 
 class OfertaMateria(models.Model):
     """Ofertas de Materias"""
+    TURNO_CHOICES = [
+        ('MAÑANA', 'Mañana'),
+        ('TARDE', 'Tarde'),
+        ('NOCHE', 'Noche'),
+    ]
+
     materia_carrera = models.ForeignKey(MateriaCarreraSemestre, on_delete=models.CASCADE, related_name='ofertas')
     periodo = models.ForeignKey(PeriodoAcademico, on_delete=models.CASCADE, related_name='ofertas')
     grupo = models.CharField(max_length=5, verbose_name="Grupo")
+    turno = models.CharField(max_length=20, choices=TURNO_CHOICES, default='MAÑANA', verbose_name="Turno")
     docente = models.CharField(max_length=100, verbose_name="Docente", default="Por designar")
     horario = models.CharField(max_length=100, verbose_name="Horario", default="HORARIO A CONFIRMAR")
     cupo_maximo = models.IntegerField(default=40, verbose_name="Cupo Máximo")
@@ -26,15 +33,30 @@ class OfertaMateria(models.Model):
 
 
 class Inscripcion(models.Model):
-    """Inscripciones"""
+    """Inscripciones / Transacciones"""
     ESTADO_CHOICES = [
         ('PENDIENTE', 'Pendiente'),
         ('CONFIRMADA', 'Confirmada'),
         ('CANCELADA', 'Cancelada'),
     ]
 
+    TIPO_PROCESO_CHOICES = [
+        ('INSCRIPCION', 'Inscripción'),
+        ('ADICION', 'Adición'),
+        ('RETIRO', 'Retiro'),
+    ]
+
+    VIA_CHOICES = [
+        ('WEB', 'Web'),
+        ('VENTANILLA', 'Ventanilla'),
+    ]
+
     estudiante_carrera = models.ForeignKey(EstudianteCarrera, on_delete=models.CASCADE, related_name='inscripciones')
     periodo_academico = models.ForeignKey(PeriodoAcademico, on_delete=models.CASCADE, related_name='inscripciones')
+    
+    tipo_proceso = models.CharField(max_length=20, choices=TIPO_PROCESO_CHOICES, default='INSCRIPCION', verbose_name="Proceso")
+    via = models.CharField(max_length=20, choices=VIA_CHOICES, default='WEB', verbose_name="Vía")
+    
     fecha_inscripcion_asignada = models.DateField(verbose_name="Fecha de Inscripción Asignada")
     fecha_inscripcion_realizada = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de Inscripción Realizada")
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='PENDIENTE')
@@ -46,8 +68,7 @@ class Inscripcion(models.Model):
     class Meta:
         verbose_name = "Inscripción"
         verbose_name_plural = "Inscripciones"
-        unique_together = ['estudiante_carrera', 'periodo_academico']
-        ordering = ['-fecha_inscripcion_asignada']
+        ordering = ['-fecha_inscripcion_realizada', '-fecha_inscripcion_asignada']
 
     def __str__(self):
         return f"Inscripción {self.estudiante_carrera.estudiante.registro} - {self.estudiante_carrera.carrera.codigo} - {self.periodo_academico.codigo}"

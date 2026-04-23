@@ -42,23 +42,11 @@ class MainLayout extends StatelessWidget {
     final isDesktop = Responsive.isDesktop(context);
 
     if (studentRegister == null) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.person_off_outlined, size: 64, color: Colors.grey),
-              const SizedBox(height: 16),
-              const Text('No se ha proporcionado un registro o la sesión se ha reiniciado.', style: TextStyle(fontSize: 16)),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.login),
-                label: const Text('Volver al Inicio de Sesión'),
-                onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false),
-              ),
-            ],
-          ),
-        ),
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 

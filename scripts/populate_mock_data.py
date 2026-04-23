@@ -2,10 +2,14 @@ import os
 import django
 
 # Configurar el entorno de Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inscripcion_backend.settings')
+import sys
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(project_root, 'inscripcion_backend'))
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.base')
 django.setup()
 
-from inscripcion.models import Carrera, PlanEstudios, Materia, MateriaCarreraSemestre, Estudiante, EstudianteCarrera, PeriodoAcademico
+from apps.inscripcion.models import Carrera, PlanEstudios, Materia, MateriaCarreraSemestre, Estudiante, EstudianteCarrera, PeriodoAcademico
 
 def populate():
     print("Poblando datos académicos...")

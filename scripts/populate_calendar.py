@@ -1,0 +1,52 @@
+import os
+import django
+import sys
+from datetime import date
+
+# Añadir el directorio del backend al path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'inscripcion_backend'))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+django.setup()
+
+from apps.inscripcion.models import EventoCalendario, PeriodoAcademico
+
+def populate_calendar():
+    # Obtener el periodo 1/2025
+    periodo, _ = PeriodoAcademico.objects.get_or_create(
+        codigo='1/2025',
+        defaults={
+            'nombre': 'Primer Semestre 2025',
+            'tipo': '1/2025',
+            'fecha_inicio': date(2025, 2, 1),
+            'fecha_fin': date(2025, 7, 31),
+            'activo': True,
+            'inscripciones_habilitadas': True
+        }
+    )
+
+    # Lista de eventos del screenshot
+    eventos = [
+        ('Inicio de actividades académicas - Semestre 1/2025', date(2025, 2, 3), 'ACADEMICO'),
+        ('Inscripción estudiantes antiguos', date(2025, 2, 15), 'INSCRIPCION'),
+        ('Período de adición de materias', date(2025, 2, 25), 'INSCRIPCION'),
+        ('Feriado - Día del Departamento', date(2025, 3, 1), 'FERIADO'),
+        ('Período de retiro de materias', date(2025, 3, 10), 'INSCRIPCION'),
+        ('Primer examen parcial', date(2025, 4, 14), 'EXAMEN'),
+    ]
+
+    print(f"Poblando calendario para el periodo {periodo.codigo}...")
+
+    for titulo, fecha, tipo in eventos:
+        evento, created = EventoCalendario.objects.get_or_create(
+            titulo=titulo,
+            fecha=fecha,
+            periodo=periodo,
+            defaults={'tipo': tipo}
+        )
+        if created:
+            print(f"  [+] Evento creado: {titulo} ({fecha})")
+        else:
+            print(f"  [ ] El evento ya existe: {titulo}")
+
+if __name__ == "__main__":
+    populate_calendar()

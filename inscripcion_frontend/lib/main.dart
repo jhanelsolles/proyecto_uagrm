@@ -14,9 +14,15 @@ import 'package:inscripcion_frontend/modules/inscripcion/pages/enrollment_slip_s
 import 'package:inscripcion_frontend/modules/inscripcion/pages/blocked_status_screen.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/pages/enrollment_screen.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/pages/enrollment_dates_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/academic_calendar_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/transactions_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/offers_screen.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/pages/payments_screen.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es', null);
   
   // Configurar barra de estado para que sea legible
   SystemChrome.setSystemUIOverlayStyle(
@@ -63,6 +69,10 @@ class UAGRMApp extends StatelessWidget {
                 case '/blocked-status': page = const BlockedStatusScreen(); break;
                 case '/enrollment': page = const EnrollmentScreen(); break;
                 case '/enrollment-dates': page = const EnrollmentDatesScreen(); break;
+                case '/calendar': page = const AcademicCalendarScreen(); break;
+                case '/transactions': page = const TransactionsScreen(); break;
+                case '/offers': page = const OffersScreen(); break;
+                case '/payments': page = const PaymentsScreen(); break;
                 default: page = const LoginScreen();
               }
 

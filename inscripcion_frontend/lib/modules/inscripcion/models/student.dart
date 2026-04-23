@@ -34,6 +34,10 @@ class PanelOptions {
   final bool enabledPeriod;
   final bool enrollmentSlips;
   final bool enrollment;
+  final bool transactions;
+  final bool masterOffers;
+  final bool payments;
+  final bool academicCalendar;
 
   PanelOptions({
     this.inscriptionDates = false,
@@ -42,16 +46,24 @@ class PanelOptions {
     this.enabledPeriod = false,
     this.enrollmentSlips = false,
     this.enrollment = false,
+    this.transactions = false,
+    this.masterOffers = false,
+    this.payments = false,
+    this.academicCalendar = false,
   });
 
   factory PanelOptions.fromJson(Map<String, dynamic> json, Map<String, dynamic>? periodJson) {
     return PanelOptions(
-      inscriptionDates: json['fechasInscripcion'] ?? false,
+      inscriptionDates: json['fechasInscripcion'] ?? json['fechas_inscripcion'] ?? false,
       blocked: json['bloqueo'] ?? false,
-      enabledSubjects: true, // Por defecto true, ya que no viene en las opciones
+      enabledSubjects: true, 
       enabledPeriod: periodJson?['inscripcionesHabilitadas'] ?? false,
       enrollmentSlips: json['boleta'] ?? false,
       enrollment: json['inscripcion'] ?? false,
+      transactions: json['transacciones'] ?? true, // Forzar true si no viene, para asegurar acceso
+      masterOffers: json['maestroOfertas'] ?? json['maestro_ofertas'] ?? true,
+      payments: json['pagos'] ?? true,
+      academicCalendar: json['calendarioAcademico'] ?? json['calendario_academico'] ?? true,
     );
   }
 }

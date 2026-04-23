@@ -34,7 +34,7 @@ class Sidebar extends StatelessWidget {
         children: [
           // Logo y Título
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+            padding: const EdgeInsets.fromLTRB(24, 30, 24, 20),
             child: Row(
               children: [
                 Container(
@@ -71,51 +71,6 @@ class Sidebar extends StatelessWidget {
             ),
           ),
 
-          const Divider(color: Colors.white10, height: 1),
-
-          // Selector de Carrera
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'CARRERA',
-                  style: TextStyle(
-                    color: Colors.white38,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          provider.selectedCareer?.name ?? 'Sin carrera',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const Icon(Icons.keyboard_arrow_down, color: Colors.white60, size: 16),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           // Menú de Navegación
           Expanded(
@@ -146,6 +101,30 @@ class Sidebar extends StatelessWidget {
                   isActive: currentRoute == '/enrollment-slip',
                   onTap: () => Navigator.pushReplacementNamed(context, '/enrollment-slip'),
                 ),
+                _SidebarItem(
+                  icon: Icons.paid_outlined,
+                  title: 'Transacciones',
+                  isActive: currentRoute == '/transactions',
+                  onTap: () => Navigator.pushReplacementNamed(context, '/transactions'),
+                ),
+                _SidebarItem(
+                  icon: Icons.calendar_month_outlined,
+                  title: 'Calendario Académico',
+                  isActive: currentRoute == '/calendar',
+                  onTap: () => Navigator.pushReplacementNamed(context, '/calendar'),
+                ),
+                _SidebarItem(
+                  icon: Icons.grid_view_outlined,
+                  title: 'Maestro de Ofertas',
+                  isActive: currentRoute == '/offers',
+                  onTap: () => Navigator.pushReplacementNamed(context, '/offers'),
+                ),
+                _SidebarItem(
+                  icon: Icons.credit_card_outlined,
+                  title: 'Pagos',
+                  isActive: currentRoute == '/payments',
+                  onTap: () => Navigator.pushReplacementNamed(context, '/payments'),
+                ),
               ],
             ),
           ),
@@ -153,7 +132,7 @@ class Sidebar extends StatelessWidget {
           // Perfil del Usuario
           const Divider(color: Colors.white10, height: 1),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Column(
               children: [
                 Row(
@@ -250,7 +229,7 @@ class _SidebarItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           hoverColor: Colors.white10,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
                 Icon(
