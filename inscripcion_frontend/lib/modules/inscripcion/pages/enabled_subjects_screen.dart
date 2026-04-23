@@ -6,6 +6,7 @@ import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/models/subject.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/services/registration_provider.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/widgets/main_layout.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EnabledSubjectsScreen extends StatelessWidget {
   const EnabledSubjectsScreen({super.key});
@@ -71,14 +72,15 @@ class EnabledSubjectsScreen extends StatelessWidget {
         final subjectsData = result.data?['materiasHabilitadas'] as List<dynamic>? ?? [];
         final subjects = subjectsData.map((data) => Subject.fromJson(data)).toList();
 
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         if (subjects.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.book_outlined, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text('No hay materias habilitadas', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                Icon(Icons.book_outlined, size: 64, color: Theme.of(context).brightness == Brightness.dark ? UAGRMTheme.accentCyan.withValues(alpha: 0.3) : Colors.grey),
+                const SizedBox(height: 16),
+                Text('No hay materias habilitadas', style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color)),
               ],
             ),
           );
@@ -95,9 +97,10 @@ class EnabledSubjectsScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _summaryBadge('${subjects.length}', 'materias habilitadas', UAGRMTheme.primaryBlue),
+                        _summaryBadge(context, '${subjects.length}', 'materias habilitadas', UAGRMTheme.primaryBlue),
                         const SizedBox(width: 12),
                         _summaryBadge(
+                          context,
                           '${subjects.where((s) => s.isRequired).length}',
                           'obligatorias',
                           UAGRMTheme.errorRed,
@@ -109,26 +112,32 @@ class EnabledSubjectsScreen extends StatelessWidget {
                     Container(
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade300, width: 1),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                        color: Theme.of(context).cardTheme.color,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.05), width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.04),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          )
+                        ],
                       ),
                       child: Column(
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: UAGRMTheme.primaryBlue,
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
+                              borderRadius: isDark ? const BorderRadius.vertical(top: Radius.circular(15)) : const BorderRadius.vertical(top: Radius.circular(7)),
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
-                                SizedBox(width: 80, child: Text('CÓDIGO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white))),
-                                Expanded(child: Text('NOMBRE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white))),
-                                SizedBox(width: 80, child: Text('CREDITOS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white), textAlign: TextAlign.center)),
-                                SizedBox(width: 80, child: Text('SEMESTRE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white), textAlign: TextAlign.center)),
-                                SizedBox(width: 100, child: Text('TIPO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white), textAlign: TextAlign.center)),
+                                SizedBox(width: 80, child: Text('CÓDIGO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null))),
+                                Expanded(child: Text('NOMBRE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null))),
+                                SizedBox(width: 80, child: Text('CREDITOS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null), textAlign: TextAlign.center)),
+                                SizedBox(width: 80, child: Text('SEMESTRE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null), textAlign: TextAlign.center)),
+                                SizedBox(width: 100, child: Text('TIPO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null), textAlign: TextAlign.center)),
                               ],
                             ),
                           ),
@@ -136,18 +145,18 @@ class EnabledSubjectsScreen extends StatelessWidget {
                             final i = entry.key;
                             final subject = entry.value;
                             return Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: isDark ? 14 : 12),
                               decoration: BoxDecoration(
-                                color: i % 2 == 0 ? Colors.white : const Color(0xFFFAFAFA),
-                                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                                color: i % 2 == 0 ? (isDark ? Colors.transparent : Colors.white) : (isDark ? Colors.white.withValues(alpha: 0.01) : const Color(0xFFFAFAFA)),
+                                border: Border(bottom: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade200)),
                               ),
                               child: Row(
                                 children: [
                                   SizedBox(
                                     width: 80,
-                                    child: Text(subject.code, style: const TextStyle(fontFamily: 'monospace', fontSize: 13, fontWeight: FontWeight.w600, color: UAGRMTheme.primaryBlue)),
+                                    child: Text(subject.code, style: TextStyle(fontFamily: isDark ? GoogleFonts.firaCode().fontFamily : 'monospace', fontSize: 13, fontWeight: FontWeight.w600, color: isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue)),
                                   ),
-                                  Expanded(child: Text(subject.name, style: const TextStyle(fontSize: 13))),
+                                  Expanded(child: Text(subject.name, style: TextStyle(fontSize: 13, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null))),
                                   SizedBox(width: 80, child: Text('${subject.credits}', style: const TextStyle(fontSize: 13), textAlign: TextAlign.center)),
                                   SizedBox(width: 80, child: Text('${subject.semester}', style: const TextStyle(fontSize: 13), textAlign: TextAlign.center)),
                                   SizedBox(
@@ -166,6 +175,7 @@ class EnabledSubjectsScreen extends StatelessWidget {
                                             fontSize: 10,
                                             color: subject.isRequired ? UAGRMTheme.primaryBlue : UAGRMTheme.textGrey,
                                             fontWeight: FontWeight.w600,
+                                            fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null,
                                           ),
                                         ),
                                       ),
@@ -236,20 +246,21 @@ class EnabledSubjectsScreen extends StatelessWidget {
     );
   }
 
-  Widget _summaryBadge(String value, String label, Color color) {
+  Widget _summaryBadge(BuildContext context, String value, String label, Color color) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(isDark ? 12 : 8),
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
+          Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null)),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 12, color: UAGRMTheme.textGrey)),
+          Text(label, style: TextStyle(fontSize: 12, color: isDark ? Colors.white70 : UAGRMTheme.textGrey, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null)),
         ],
       ),
     );

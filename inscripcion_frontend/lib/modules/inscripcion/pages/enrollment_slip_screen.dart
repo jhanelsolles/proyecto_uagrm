@@ -107,23 +107,25 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
   }
 
   Widget _buildPeriodAndTabSelector(String registro, bool isDesktop) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark ? (Theme.of(context).cardTheme.color ?? const Color(0xFF1E293B)) : Colors.white;
+
     if (isDesktop) {
       return Container(
-        color: Colors.white,
+        color: backgroundColor,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         child: Row(
           children: [
-            _buildHistorialSelector(registro),
+            _buildHistorialSelector(registro, isDark),
             const Spacer(),
-            _buildViewTabs(),
+            _buildViewTabs(isDark),
           ],
         ),
       );
     }
 
-    // Diseño para Móviles (Evitar desbordamiento)
     return Container(
-      color: Colors.white,
+      color: backgroundColor,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,24 +134,24 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildHistorialSelector(registro),
+                _buildHistorialSelector(registro, isDark),
                 const SizedBox(width: 16),
-                _buildOpcionesSelector(),
+                _buildOpcionesSelector(isDark),
               ],
             ),
           ),
           const SizedBox(height: 12),
-          _buildViewTabs(),
+          _buildViewTabs(isDark),
         ],
       ),
     );
   }
 
-  Widget _buildHistorialSelector(String registro) {
+  Widget _buildHistorialSelector(String registro, bool isDark) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('Historial:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: UAGRMTheme.textDark)),
+        Text('Historial:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white70 : UAGRMTheme.textDark)),
         const SizedBox(width: 12),
         Query(
           options: QueryOptions(
@@ -162,13 +164,14 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
             return DropdownButton<String?>(
               value: selectedPeriodCodigo,
               underline: const SizedBox.shrink(),
+              dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
               isDense: true,
-              hint: const Text('Actual', style: TextStyle(fontSize: 13)),
+              hint: Text('Actual', style: TextStyle(fontSize: 13, color: isDark ? Colors.white : Colors.black)),
               items: [
-                const DropdownMenuItem<String?>(value: null, child: Text('Actual', style: TextStyle(fontSize: 13))),
+                DropdownMenuItem<String?>(value: null, child: Text('Actual', style: TextStyle(fontSize: 13, color: isDark ? Colors.white : Colors.black))),
                 ...periods.map((p) => DropdownMenuItem<String?>(
                   value: p['codigo']?.toString(),
-                  child: Text(p['nombre']?.toString() ?? p['codigo']?.toString() ?? '', style: const TextStyle(fontSize: 13)),
+                  child: Text(p['nombre']?.toString() ?? p['codigo']?.toString() ?? '', style: TextStyle(fontSize: 13, color: isDark ? Colors.white : Colors.black)),
                 )),
               ],
               onChanged: (val) => setState(() => selectedPeriodCodigo = val),
@@ -179,20 +182,21 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
     );
   }
 
-  Widget _buildOpcionesSelector() {
+  Widget _buildOpcionesSelector(bool isDark) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('Opciones:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: UAGRMTheme.textDark)),
+        Text('Opciones:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white70 : UAGRMTheme.textDark)),
         const SizedBox(width: 12),
         DropdownButton<String?>(
           value: null,
           underline: const SizedBox.shrink(),
+          dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
           isDense: true,
-          hint: const Text('Config', style: TextStyle(fontSize: 13)),
-          items: const [
-            DropdownMenuItem<String?>(value: 'opt1', child: Text('Descargar', style: TextStyle(fontSize: 13))),
-            DropdownMenuItem<String?>(value: 'opt2', child: Text('Compartir', style: TextStyle(fontSize: 13))),
+          hint: Text('Config', style: TextStyle(fontSize: 13, color: isDark ? Colors.white : Colors.black)),
+          items: [
+            DropdownMenuItem<String?>(value: 'opt1', child: Text('Descargar', style: TextStyle(fontSize: 13, color: isDark ? Colors.white : Colors.black))),
+            DropdownMenuItem<String?>(value: 'opt2', child: Text('Compartir', style: TextStyle(fontSize: 13, color: isDark ? Colors.white : Colors.black))),
           ],
           onChanged: (val) {},
         ),
@@ -200,40 +204,40 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
     );
   }
 
-  Widget _buildViewTabs() {
+  Widget _buildViewTabs(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: isDark ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildTabButton('Boleta Normal', !_isGraphicalView),
-          _buildTabButton('Boleta Gráfica', _isGraphicalView),
+          _buildTabButton('Boleta Normal', !_isGraphicalView, isDark),
+          _buildTabButton('Boleta Gráfica', _isGraphicalView, isDark),
         ],
       ),
     );
   }
 
-  Widget _buildTabButton(String title, bool active) {
+  Widget _buildTabButton(String title, bool active, bool isDark) {
     return GestureDetector(
       onTap: () => setState(() => _isGraphicalView = title == 'Boleta Gráfica'),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.transparent,
+          color: active ? (isDark ? UAGRMTheme.primaryBlue : Colors.white) : Colors.transparent,
           borderRadius: BorderRadius.circular(30),
-          boxShadow: active ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : [],
+          boxShadow: active ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)] : [],
         ),
         child: Text(
           title,
           style: TextStyle(
             fontSize: 12,
             fontWeight: active ? FontWeight.bold : FontWeight.w500,
-            color: active ? UAGRMTheme.primaryBlue : UAGRMTheme.textGrey,
+            color: active ? (isDark ? Colors.white : UAGRMTheme.primaryBlue) : (isDark ? Colors.white54 : UAGRMTheme.textGrey),
           ),
         ),
       ),
@@ -247,6 +251,7 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
 
   Widget _buildGraphicalBoleta(BuildContext context, Map<String, dynamic> data, RegistrationProvider provider) {
     final materias = data['materiasInscritas'] as List<dynamic>? ?? [];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -254,7 +259,7 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
         children: [
           Row(
             children: [
-              const Text('BOLETA GRÁFICA', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: UAGRMTheme.textDark)),
+              Text('BOLETA GRÁFICA', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isDark ? UAGRMTheme.accentCyan : UAGRMTheme.textDark)),
               const Spacer(),
               ElevatedButton.icon(
                 icon: const Icon(Icons.print, size: 18),
@@ -281,6 +286,7 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
     final carreraNombre = provider.selectedCareer?.name ?? '';
     final carreraCodigo = provider.selectedCareer?.code ?? '';
     final totalCreditos = materias.fold<int>(0, (sum, item) => sum + ((item['materia']?['creditos'] as int?) ?? 0));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
       child: ConstrainedBox(
@@ -289,20 +295,28 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
           padding: const EdgeInsets.all(24),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20)],
+              color: isDark ? Theme.of(context).cardTheme.color : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05), 
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                )
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  padding: const EdgeInsets.symmetric(vertical: 40),
                   child: Column(
                     children: [
-                      const Text('Universidad Autónoma Gabriel René Moreno', style: TextStyle(fontSize: 14, color: Colors.grey, letterSpacing: 0.5)),
-                      const SizedBox(height: 8),
-                      Text('BOLETA DE INSCRIPCIÓN', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                      Text('Universidad Autónoma Gabriel René Moreno', style: TextStyle(fontSize: 13, color: isDark ? Colors.white54 : Colors.grey, letterSpacing: 0.5, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null)),
+                      const SizedBox(height: 12),
+                      Text('BOLETA DE INSCRIPCIÓN', style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 2, color: isDark ? Colors.white : UAGRMTheme.textDark)),
+                      if (isDark) Container(margin: const EdgeInsets.only(top: 8), width: 80, height: 3, decoration: BoxDecoration(color: UAGRMTheme.accentCyan, borderRadius: BorderRadius.circular(2))),
                     ],
                   ),
                 ),
@@ -311,33 +325,39 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _webInfoField('Registro', estudiante['registro']?.toString() ?? ''),
-                      _webInfoField('Estudiante', estudiante['nombreCompleto'] ?? ''),
-                      _webInfoField('Carrera', carreraNombre),
+                      _webInfoField('Registro', estudiante['registro']?.toString() ?? '', isDark),
+                      _webInfoField('Estudiante', estudiante['nombreCompleto'] ?? '', isDark),
+                      _webInfoField('Carrera', carreraNombre, isDark),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _buildWebTable(materias),
+                  child: _buildWebTable(materias, isDark),
                 ),
                 Container(
                   margin: const EdgeInsets.all(24),
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(12),
+                    color: isDark ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     children: [
-                      _summaryItem(materias.length.toString(), 'Materias'),
-                      const SizedBox(width: 40),
-                      _summaryItem(totalCreditos.toString(), 'Créditos'),
+                      _summaryItem(materias.length.toString(), 'Materias', isDark),
+                      const SizedBox(width: 48),
+                      _summaryItem(totalCreditos.toString(), 'Créditos', isDark),
                       const Spacer(),
                       ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: UAGRMTheme.primaryBlue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                         icon: const Icon(Icons.print),
-                        label: const Text('IMPRIMIR COMPROBANTE'),
+                        label: const Text('IMPRIMIR COMPROBANTE', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
                         onPressed: () => PdfGenerator.generateAndPrintBoleta(
                           data: data,
                           carreraNombre: carreraNombre,
@@ -356,55 +376,55 @@ class _EnrollmentSlipScreenState extends State<EnrollmentSlipScreen> {
     );
   }
 
-  Widget _webInfoField(String label, String value) {
+  Widget _webInfoField(String label, String value, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: UAGRMTheme.textDark)),
+        Text(label.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isDark ? UAGRMTheme.accentCyan : Colors.grey, letterSpacing: 1.2)),
+        const SizedBox(height: 6),
+        Text(value, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? Colors.white : UAGRMTheme.textDark, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null)),
       ],
     );
   }
 
-  Widget _summaryItem(String value, String label) {
+  Widget _summaryItem(String value, String label, bool isDark) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: UAGRMTheme.primaryBlue)),
-        const SizedBox(width: 8),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue)),
+        const SizedBox(width: 10),
+        Text(label, style: TextStyle(fontSize: 13, color: isDark ? Colors.white54 : Colors.grey)),
       ],
     );
   }
 
-  Widget _buildWebTable(List<dynamic> materias) {
+  Widget _buildWebTable(List<dynamic> materias, bool isDark) {
     return Table(
       columnWidths: const {
-        0: FixedColumnWidth(80),
+        0: FixedColumnWidth(100), // SIGLA aumentado para evitar desbordamiento
         1: FlexColumnWidth(4),
-        2: FixedColumnWidth(60),
-        3: FixedColumnWidth(160),
+        2: FixedColumnWidth(70),
+        3: FixedColumnWidth(180),
       },
       children: [
         TableRow(
-          decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0), width: 2))),
+          decoration: BoxDecoration(border: Border(bottom: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE2E8F0), width: 2))),
           children: ['SIGLA', 'MATERIA', 'GRUPO', 'HORARIO'].map((t) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            child: Text(t, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.grey)),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+            child: Text(t, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: isDark ? Colors.white38 : Colors.grey, letterSpacing: 1)),
           )).toList(),
         ),
         ...materias.map((m) {
           final mat = m['materia'] ?? {};
           final oferta = m['oferta'] ?? {};
           return TableRow(
-            decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9)))),
+            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFF1F5F9)))),
             children: [
-              Padding(padding: const EdgeInsets.all(12), child: Text(mat['codigo'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, color: UAGRMTheme.primaryBlue))),
-              Padding(padding: const EdgeInsets.all(12), child: Text(mat['nombre'] ?? '')),
-              Padding(padding: const EdgeInsets.all(12), child: Text(oferta['grupo'] ?? m['grupo'] ?? '', textAlign: TextAlign.center)),
-              Padding(padding: const EdgeInsets.all(12), child: Text(TimeFormatter.formatHorario(oferta['horario'] ?? ''), style: const TextStyle(fontSize: 12, color: UAGRMTheme.textGrey))),
+              Padding(padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8), child: Text(mat['codigo'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue, fontFamily: isDark ? GoogleFonts.firaCode().fontFamily : null, fontSize: 13))),
+              Padding(padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8), child: Text(mat['nombre'] ?? '', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null))),
+              Padding(padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8), child: Text(oferta['grupo'] ?? m['grupo'] ?? '', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87))),
+              Padding(padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8), child: Text(TimeFormatter.formatHorario(oferta['horario'] ?? ''), style: TextStyle(fontSize: 12, color: isDark ? Colors.white70 : UAGRMTheme.textGrey))),
             ],
           );
         }),

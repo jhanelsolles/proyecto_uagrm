@@ -139,7 +139,7 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
                 style: GoogleFonts.outfit(
                   fontSize: isMobile ? 24 : 32,
                   fontWeight: FontWeight.bold,
-                  color: UAGRMTheme.textDark,
+                  color: Theme.of(context).brightness == Brightness.dark ? UAGRMTheme.darkText : UAGRMTheme.textDark,
                 ),
               ),
               const SizedBox(height: 4),
@@ -147,7 +147,7 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
                 student.career,
                 style: TextStyle(
                   fontSize: isMobile ? 14 : 16,
-                  color: const Color(0xFF64748B),
+                  color: Theme.of(context).brightness == Brightness.dark ? UAGRMTheme.darkTextSecondary : const Color(0xFF64748B),
                 ),
               ),
             ],
@@ -192,7 +192,7 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: UAGRMTheme.textDark,
+              color: Theme.of(context).brightness == Brightness.dark ? UAGRMTheme.darkText : UAGRMTheme.textDark,
             ),
           ),
           const SizedBox(height: 16),
@@ -202,7 +202,7 @@ class _MainPanelScreenState extends State<MainPanelScreen> {
             crossAxisCount: isDesktop ? 4 : (isMobile ? 1 : 2),
             crossAxisSpacing: isMobile ? 12 : 20,
             mainAxisSpacing: isMobile ? 12 : 20,
-            childAspectRatio: isMobile ? 3.2 : 1.4,
+            childAspectRatio: isMobile ? 3.0 : 1.4,
             children: [
               _DashboardCard(
                 icon: Icons.edit_calendar_outlined,
@@ -286,21 +286,28 @@ class _StatusSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            UAGRMTheme.primaryBlue,
-            UAGRMTheme.primaryBlue.withValues(alpha: 0.9),
-            const Color(0xFF0D47A1), // Azul más profundo
-          ],
+          colors: isDark 
+            ? [
+                const Color(0xFF1E293B),
+                const Color(0xFF0F172A),
+              ]
+            : [
+                UAGRMTheme.primaryBlue,
+                UAGRMTheme.primaryBlue.withValues(alpha: 0.9),
+                const Color(0xFF0D47A1),
+              ],
         ),
-        borderRadius: BorderRadius.circular(12), // Un poco más pequeño para móvil
+        border: isDark ? Border.all(color: Colors.white.withValues(alpha: 0.1)) : null,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: UAGRMTheme.primaryBlue.withValues(alpha: 0.2),
+            color: (Theme.of(context).brightness == Brightness.dark ? Colors.black : UAGRMTheme.primaryBlue).withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -348,7 +355,7 @@ class _StatusSummaryCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: isStatus 
                           ? (value.toUpperCase() == 'ACTIVO' ? const Color(0xFF4ADE80) : Colors.orangeAccent)
-                          : Colors.white,
+                          : (isDark ? UAGRMTheme.accentCyan : Colors.white),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -379,7 +386,7 @@ class _StatusSummaryCard extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               color: isStatus 
                                 ? (value.toUpperCase() == 'ACTIVO' ? const Color(0xFF4ADE80) : Colors.orangeAccent)
-                                : Colors.white,
+                                : (isDark ? UAGRMTheme.accentCyan : Colors.white),
                             ),
                           ),
                         ],
@@ -393,7 +400,7 @@ class _StatusSummaryCard extends StatelessWidget {
                       ),
                       child: Icon(
                         icon,
-                        color: Colors.white,
+                        color: isDark ? UAGRMTheme.accentCyan : Colors.white,
                         size: 28,
                       ),
                     ),
@@ -466,58 +473,112 @@ class _DashboardCardState extends State<_DashboardCard> {
             ],
           ),
           padding: EdgeInsets.all(isMobile ? 16 : 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsets.all(isMobile ? 8 : 10),
-                decoration: BoxDecoration(
-                  color: widget.isAvailable 
-                      ? (_isHovered ? UAGRMTheme.primaryBlue : const Color(0xFFF1F5F9)) 
-                      : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: _isHovered ? [
-                    BoxShadow(
-                      color: UAGRMTheme.primaryBlue.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    )
-                  ] : [],
-                ),
-                child: Icon(
-                  widget.icon,
-                  color: widget.isAvailable 
-                      ? (_isHovered ? Colors.white : UAGRMTheme.primaryBlue) 
-                      : Colors.grey,
-                  size: isMobile ? 22 : 24,
-                ),
+          child: isMobile 
+            ? Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: widget.isAvailable 
+                          ? (_isHovered ? UAGRMTheme.primaryBlue : (isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9))) 
+                          : (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      widget.icon,
+                      color: widget.isAvailable 
+                          ? (_isHovered ? Colors.white : UAGRMTheme.primaryBlue) 
+                          : Colors.grey,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: widget.isAvailable 
+                                ? (isDark ? Colors.white : const Color(0xFF1E293B)) 
+                                : Colors.grey,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.description,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: widget.isAvailable 
+                                ? (isDark ? Colors.white60 : const Color(0xFF64748B)) 
+                                : Colors.grey.shade400,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: widget.isAvailable 
+                          ? (_isHovered ? UAGRMTheme.primaryBlue : const Color(0xFFF1F5F9)) 
+                          : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: _isHovered ? [
+                        BoxShadow(
+                          color: UAGRMTheme.primaryBlue.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        )
+                      ] : [],
+                    ),
+                    child: Icon(
+                      widget.icon,
+                      color: widget.isAvailable 
+                          ? (_isHovered ? Colors.white : UAGRMTheme.primaryBlue) 
+                          : Colors.grey,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: widget.isAvailable 
+                          ? (isDark ? Colors.white : const Color(0xFF1E293B)) 
+                          : Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.description,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: widget.isAvailable 
+                          ? (isDark ? Colors.white60 : const Color(0xFF64748B)) 
+                          : Colors.grey.shade400,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              SizedBox(height: isMobile ? 12 : 12),
-              Text(
-                widget.title,
-                style: TextStyle(
-                  fontSize: isMobile ? 14 : 16,
-                  fontWeight: FontWeight.bold,
-                  color: widget.isAvailable 
-                      ? (isDark ? Colors.white : const Color(0xFF1E293B)) 
-                      : Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                widget.description,
-                style: TextStyle(
-                  fontSize: isMobile ? 11 : 12,
-                  color: widget.isAvailable 
-                      ? (isDark ? Colors.white60 : const Color(0xFF64748B)) 
-                      : Colors.grey.shade400,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
         ),
       ),
     );

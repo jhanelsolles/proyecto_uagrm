@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/widgets/main_layout.dart';
 import 'package:inscripcion_frontend/shared/utils/responsive_helper.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EnrollmentDatesScreen extends StatefulWidget {
   const EnrollmentDatesScreen({super.key});
@@ -71,40 +72,50 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
   }
 
   Widget _buildContent(bool isLarge) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (isLarge) ...[
-          const Text(
+          Text(
             'Periodos de Inscripción',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: UAGRMTheme.textDark),
+            style: TextStyle(
+              fontSize: 16, 
+              fontWeight: FontWeight.bold, 
+              color: isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue,
+              fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
         ],
         Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey.shade300, width: 1),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: isLarge
-                ? [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))]
-                : null,
+            color: isDark ? Theme.of(context).cardTheme.color : Colors.white,
+            border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200, width: 1),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              )
+            ],
           ),
           child: Column(
             children: [
               Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: UAGRMTheme.primaryBlue,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 child: Row(
                   children: [
-                    _headerCell('PERIODO', flex: 2),
-                    _headerCell('FECHA DE INICIO', flex: 2),
-                    _headerCell('FECHA FIN', flex: 2),
-                    _headerCell('ESTADO', flex: 2),
+                    _headerCell('PERIODO', flex: 2, isDark: isDark),
+                    _headerCell('FECHA DE INICIO', flex: 3, isDark: isDark),
+                    _headerCell('FECHA FIN', flex: 3, isDark: isDark),
+                    _headerCell('ESTADO', flex: 2, isDark: isDark),
                   ],
                 ),
               ),
@@ -115,39 +126,35 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
                 final isHabilitado = estado == 'HABILITADO';
                 return Container(
                   decoration: BoxDecoration(
-                    color: isLarge
-                        ? (isEven ? Colors.white : const Color(0xFFFAFAFA))
-                        : (isEven ? Colors.grey.shade300 : Colors.grey.shade400),
-                    border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                    color: isEven ? Colors.transparent : (isDark ? Colors.white.withValues(alpha: 0.01) : const Color(0xFFFAFAFA)),
+                    border: Border(bottom: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100)),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                   child: Row(
                     children: [
-                      Expanded(flex: 2, child: Text(item['periodoHabilitado'] ?? '', style: TextStyle(fontSize: isLarge ? 13 : 12), textAlign: TextAlign.center)),
-                      Expanded(flex: 2, child: Text(item['fechaInicio'] ?? '', style: TextStyle(fontSize: isLarge ? 13 : 12), textAlign: TextAlign.center)),
-                      Expanded(flex: 2, child: Text(item['fechaFin'] ?? '', style: TextStyle(fontSize: isLarge ? 13 : 12), textAlign: TextAlign.center)),
+                      Expanded(flex: 2, child: Text(item['periodoHabilitado'] ?? '', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white : UAGRMTheme.textDark, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null), textAlign: TextAlign.center)),
+                      Expanded(flex: 3, child: Text(item['fechaInicio'] ?? '', style: TextStyle(fontSize: 13, color: isDark ? Colors.white70 : UAGRMTheme.textGrey), textAlign: TextAlign.center)),
+                      Expanded(flex: 3, child: Text(item['fechaFin'] ?? '', style: TextStyle(fontSize: 13, color: isDark ? Colors.white70 : UAGRMTheme.textGrey), textAlign: TextAlign.center)),
                       Expanded(
                         flex: 2,
                         child: Center(
-                          child: isLarge
-                              ? Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: isHabilitado ? UAGRMTheme.successGreen.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: isHabilitado ? UAGRMTheme.successGreen : Colors.orange),
-                                  ),
-                                  child: Text(
-                                    estado,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: isHabilitado ? UAGRMTheme.successGreen : Colors.orange,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                )
-                              : Text(estado, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isHabilitado ? UAGRMTheme.successGreen.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: (isHabilitado ? UAGRMTheme.successGreen : Colors.orange).withValues(alpha: 0.4)),
+                            ),
+                            child: Text(
+                              estado,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: isHabilitado ? UAGRMTheme.successGreen : Colors.orange,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -161,15 +168,17 @@ class _EnrollmentDatesScreenState extends State<EnrollmentDatesScreen> {
     );
   }
 
-  Widget _headerCell(String text, {required int flex}) {
+  Widget _headerCell(String text, {required int flex, required bool isDark}) {
     return Expanded(
       flex: flex,
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
-          fontSize: 11,
+          fontSize: 10,
+          letterSpacing: 0.5,
+          fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null,
         ),
         textAlign: TextAlign.center,
       ),

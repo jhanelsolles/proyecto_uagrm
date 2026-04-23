@@ -8,6 +8,7 @@ import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/services/registration_provider.dart';
 import 'package:inscripcion_frontend/shared/utils/time_formatter.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/widgets/main_layout.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EnrollmentScreen extends StatefulWidget {
   const EnrollmentScreen({super.key});
@@ -185,6 +186,7 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
   }
 
   Widget _buildWebPeriodSelection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
@@ -197,16 +199,17 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [UAGRMTheme.primaryBlue, Color(0xFF1565C0)],
+                    colors: isDark
+                        ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+                        : [UAGRMTheme.primaryBlue, const Color(0xFF1565C0)],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
+                  borderRadius: isDark 
+                      ? const BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))
+                      : const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,24 +226,34 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
               ...periods.map((period) {
                 final periodName = period['nombre'] ?? '';
                 final isActive = period['activo'] ?? false;
+                final isDark = Theme.of(context).brightness == Brightness.dark;
                 return InkWell(
                   onTap: isActive ? () => setState(() => selectedPeriod = periodName) : null,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(isDark ? 16 : 8),
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(16),
+                    margin: EdgeInsets.only(bottom: isDark ? 12 : 10),
+                    padding: EdgeInsets.all(isDark ? 20 : 16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: isActive ? UAGRMTheme.primaryBlue.withValues(alpha: 0.3) : Colors.grey.shade200),
-                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6, offset: const Offset(0, 2))],
+                      color: isDark ? Theme.of(context).cardTheme.color : Colors.white,
+                      borderRadius: BorderRadius.circular(isDark ? 16 : 8),
+                      border: Border.all(color: isActive ? (isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue).withValues(alpha: 0.3) : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                          blurRadius: isDark ? 10 : 6,
+                          offset: isDark ? const Offset(0, 4) : const Offset(0, 2),
+                        )
+                      ],
                     ),
                     child: Row(
                       children: [
                         Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(color: UAGRMTheme.primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.calendar_today, color: UAGRMTheme.primaryBlue, size: 18),
+                          width: isDark ? 44 : 36, height: isDark ? 44 : 36,
+                          decoration: BoxDecoration(
+                            color: (isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue).withValues(alpha: 0.1), 
+                            borderRadius: BorderRadius.circular(isDark ? 12 : 8)
+                          ),
+                          child: Icon(isDark ? Icons.calendar_month_outlined : Icons.calendar_today, color: isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue, size: isDark ? 22 : 18),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -336,9 +349,10 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
   }
 
   Widget _buildFiltersSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      color: Colors.grey.shade100,
+      padding: EdgeInsets.symmetric(vertical: isDark ? 16 : 12, horizontal: isDark ? 12 : 8),
+      color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.grey.shade100,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -429,25 +443,34 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
     final allSelected = subjectsWithCupo.isNotEmpty &&
         subjectsWithCupo.every((code) => selectedSubjectCodes.contains(code));
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: isDark ? 12 : 10),
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [UAGRMTheme.primaryBlue, Color(0xFF1565C0)],
+          colors: isDark 
+            ? [const Color(0xFF1E293B), const Color(0xFF0F172A)] 
+            : [UAGRMTheme.primaryBlue, const Color(0xFF1565C0)],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
-        ),
+        borderRadius: isDark 
+            ? const BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))
+            : const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Seleccione Todas las Materias',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          Expanded(
+            child: Text(
+              'Seleccione Todas las Materias',
+              style: TextStyle(
+                fontWeight: FontWeight.bold, 
+                color: Colors.white,
+                fontSize: Responsive.isMobile(context) ? 13 : 14,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           Checkbox(
             value: allSelected,
@@ -558,24 +581,25 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
   }
 
   Widget _buildSubjectsTable(List<String> codes, Map<String, List<dynamic>> map) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'MATERIAS DISPONIBLES',
-          style: TextStyle(fontWeight: FontWeight.bold, color: UAGRMTheme.primaryBlue),
+          style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue, fontSize: isDark ? 13 : null, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300, width: 1),
-            boxShadow: Responsive.isTabletOrDesktop(context) ? [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))] : null,
+            color: isDark ? Theme.of(context).cardTheme.color : Colors.white,
+            borderRadius: BorderRadius.circular(isDark ? 16 : 8),
+            border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade300, width: 1),
+            boxShadow: Responsive.isTabletOrDesktop(context) ? [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04), blurRadius: isDark ? 10 : 8, offset: Offset(0, isDark ? 4 : 2))] : null,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(isDark ? 16 : 8),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Table(
@@ -603,16 +627,17 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
                       final isSelected = isMateriaSelected && selectedGroupId == g['id'];
                       final isOtherGroupSelected = isMateriaSelected && selectedGroupId != g['id'];
 
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
                       return TableRow(
                         decoration: BoxDecoration(
                           color: isOtherGroupSelected 
-                              ? Colors.grey.shade100 // Otro grupo de esta misma materia ya está elegido
+                              ? (isDark ? Colors.white10 : Colors.grey.shade100)
                               : !hayCupo
-                                  ? Colors.grey.shade100
+                                  ? (isDark ? Colors.white10 : Colors.grey.shade100)
                                   : isSelected
-                                      ? UAGRMTheme.primaryBlue.withValues(alpha: 0.05)
-                                      : Colors.white,
-                          border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                                      ? (isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue).withValues(alpha: 0.05)
+                                      : (isDark ? Colors.transparent : Colors.white),
+                          border: Border(bottom: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade200)),
                         ),
                         children: [
                           TableCell(
@@ -728,24 +753,25 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
 
   /// Tabla de grupos confirmados — solo se muestra DESPUES de confirmar
   Widget _buildConfirmedGroupsTable() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'GRUPOS INSCRITOS',
-          style: TextStyle(fontWeight: FontWeight.bold, color: UAGRMTheme.primaryBlue),
+          style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? UAGRMTheme.accentCyan : UAGRMTheme.primaryBlue, fontSize: isDark ? 13 : null, fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300, width: 1),
-            boxShadow: Responsive.isTabletOrDesktop(context) ? [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))] : null,
+            color: isDark ? Theme.of(context).cardTheme.color : Colors.white,
+            borderRadius: BorderRadius.circular(isDark ? 16 : 8),
+            border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade300, width: 1),
+            boxShadow: Responsive.isTabletOrDesktop(context) ? [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04), blurRadius: isDark ? 10 : 8, offset: Offset(0, isDark ? 4 : 2))] : null,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(isDark ? 16 : 8),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Table(
@@ -887,13 +913,24 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
   }
 
   TableRow _buildTableHeader(List<String> labels) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return TableRow(
-      decoration: const BoxDecoration(color: UAGRMTheme.primaryBlue),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withValues(alpha: 0.03) : UAGRMTheme.primaryBlue,
+      ),
       children: labels
           .map((l) => TableCell(
                 child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(l, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.white)),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: isDark ? 14 : 8),
+                  child: Text(
+                    l, 
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold, 
+                      fontSize: 10, 
+                      color: Colors.white,
+                      fontFamily: isDark ? GoogleFonts.outfit().fontFamily : null,
+                    )
+                  ),
                 ),
               ))
           .toList(),

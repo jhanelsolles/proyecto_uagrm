@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/models/student.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/services/registration_provider.dart';
+import 'package:inscripcion_frontend/modules/inscripcion/services/theme_provider.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/widgets/sidebar.dart';
 import 'package:inscripcion_frontend/shared/utils/responsive_helper.dart';
 
@@ -75,7 +77,7 @@ class MainLayout extends StatelessWidget {
         }
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF4F6F9),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           drawer: (!isDesktop && student != null) ? Sidebar(student: student, currentRoute: currentRoute) : null,
           body: Row(
             children: [
@@ -99,9 +101,10 @@ class MainLayout extends StatelessWidget {
 
   Widget _buildTopBar(BuildContext context, Student student) {
     final isDesktop = Responsive.isDesktop(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       child: Row(
         children: [
           if (!isDesktop)
@@ -119,11 +122,17 @@ class MainLayout extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: UAGRMTheme.textDark,
-                  ),
+                  style: isDark 
+                    ? GoogleFonts.outfit(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
+                      )
+                    : const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: UAGRMTheme.textDark,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -137,6 +146,19 @@ class MainLayout extends StatelessWidget {
           ),
           if (isDesktop) ...[
             const SizedBox(width: 16),
+            Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+                return IconButton(
+                  icon: Icon(
+                    themeProvider.isDark ? Icons.light_mode : Icons.dark_mode,
+                    color: themeProvider.isDark ? Colors.amber : UAGRMTheme.primaryBlue,
+                  ),
+                  onPressed: () => themeProvider.toggle(),
+                  tooltip: themeProvider.isDark ? 'Modo Claro' : 'Modo Noche',
+                );
+              },
+            ),
+            const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
@@ -145,11 +167,17 @@ class MainLayout extends StatelessWidget {
               ),
               child: Text(
                 '${student.career} - ${student.register}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: UAGRMTheme.primaryBlue,
-                ),
+                style: isDark 
+                  ? GoogleFonts.outfit(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: UAGRMTheme.accentCyan,
+                    )
+                  : const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: UAGRMTheme.primaryBlue,
+                    ),
               ),
             ),
           ],

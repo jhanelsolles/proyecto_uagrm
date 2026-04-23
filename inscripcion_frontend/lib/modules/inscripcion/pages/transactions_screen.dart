@@ -55,6 +55,7 @@ class TransactionsScreen extends StatelessWidget {
           if (result.isLoading) return const Center(child: CircularProgressIndicator());
           if (result.hasException) return Center(child: Text('Error: ${result.exception.toString()}'));
 
+          final isDark = Theme.of(context).brightness == Brightness.dark;
           final transactions = result.data?['misTransacciones'] ?? [];
 
           return SingleChildScrollView(
@@ -74,11 +75,17 @@ class TransactionsScreen extends StatelessWidget {
                         const SizedBox(width: 12),
                         Text(
                           'Transacciones Realizadas',
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: UAGRMTheme.textDark,
-                          ),
+                          style: isDark 
+                            ? GoogleFonts.outfit(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).textTheme.titleLarge?.color,
+                              )
+                            : const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: UAGRMTheme.textDark,
+                              ),
                         ),
                       ],
                     ),
@@ -90,17 +97,21 @@ class TransactionsScreen extends StatelessWidget {
                           child: ConstrainedBox(
                             constraints: BoxConstraints(minWidth: constraints.maxWidth),
                             child: DataTable(
-                              headingRowColor: WidgetStateProperty.all(const Color(0xFFF8FAFC)),
+                              headingRowColor: WidgetStateProperty.all(
+                                Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.white.withValues(alpha: 0.05) 
+                                  : const Color(0xFFF8FAFC)
+                              ),
                               horizontalMargin: 12,
                               columnSpacing: 24,
-                              columns: const [
-                                DataColumn(label: Text('Fecha', style: TextStyle(fontWeight: FontWeight.bold))),
-                                DataColumn(label: Text('Proceso', style: TextStyle(fontWeight: FontWeight.bold))),
-                                DataColumn(label: Text('Período', style: TextStyle(fontWeight: FontWeight.bold))),
-                                DataColumn(label: Text('Vía', style: TextStyle(fontWeight: FontWeight.bold))),
-                                DataColumn(label: Text('Materias', style: TextStyle(fontWeight: FontWeight.bold))),
-                                DataColumn(label: Text('Estado', style: TextStyle(fontWeight: FontWeight.bold))),
-                              ],
+                                columns: [
+                                  DataColumn(label: Text('Fecha', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Theme.of(context).textTheme.titleSmall?.color : null))),
+                                  DataColumn(label: Text('Proceso', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Theme.of(context).textTheme.titleSmall?.color : null))),
+                                  DataColumn(label: Text('Período', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Theme.of(context).textTheme.titleSmall?.color : null))),
+                                  DataColumn(label: Text('Vía', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Theme.of(context).textTheme.titleSmall?.color : null))),
+                                  DataColumn(label: Text('Materias', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Theme.of(context).textTheme.titleSmall?.color : null))),
+                                  DataColumn(label: Text('Estado', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Theme.of(context).textTheme.titleSmall?.color : null))),
+                                ],
                               rows: transactions.map<DataRow>((tx) {
                                 final dateStr = tx['fechaInscripcionRealizada'] != null 
                                     ? DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(tx['fechaInscripcionRealizada']))
@@ -113,19 +124,23 @@ class TransactionsScreen extends StatelessWidget {
 
                                 return DataRow(cells: [
                                   DataCell(Text(dateStr, style: const TextStyle(fontSize: 13))),
-                                  DataCell(_buildProcessBadge(tx['tipoProcesoDisplay'])),
+                                  DataCell(_buildProcessBadge(context, tx['tipoProcesoDisplay'])),
                                   DataCell(Text(tx['periodoAcademico']['codigo'], style: const TextStyle(fontSize: 13))),
-                                  DataCell(_buildViaBadge(tx['viaDisplay'])),
+                                  DataCell(_buildViaBadge(context, tx['viaDisplay'])),
                                   DataCell(
                                     Tooltip(
                                       message: materiasCodes,
                                       child: Text(
                                         materiasCodes, 
-                                        style: const TextStyle(fontSize: 11, color: Colors.blueGrey, fontWeight: FontWeight.bold)
+                                        style: TextStyle(
+                                          fontSize: 11, 
+                                          color: Theme.of(context).brightness == Brightness.dark ? UAGRMTheme.accentCyan : Colors.blueGrey, 
+                                          fontWeight: FontWeight.bold
+                                        )
                                       ),
                                     )
                                   ),
-                                  DataCell(_buildStatusBadge(tx['estado'])),
+                                  DataCell(_buildStatusBadge(context, tx['estado'])),
                                 ]);
                               }).toList(),
                             ),
@@ -143,33 +158,25 @@ class TransactionsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProcessBadge(String process) {
+  Widget _buildProcessBadge(BuildContext context, String process) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Color color;
     switch (process.toUpperCase()) {
-      case 'INSCRIPCIÓN': color = const Color(0xFF1E293B); break;
-      case 'ADICIÓN': color = const Color(0xFF0369A1); break;
-      case 'RETIRO': color = const Color(0xFF0D9488); break;
+      case 'INSCRIPCIÓN': color = isDark ? const Color(0xFF0EA5E9) : const Color(0xFF1E293B); break;
+      case 'ADICIÓN': color = isDark ? const Color(0xFF10B981) : const Color(0xFF0369A1); break;
+      case 'RETIRO': color = isDark ? const Color(0xFFF43F5E) : const Color(0xFF0D9488); break;
       default: color = Colors.grey;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
-      child: Text(process, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
-    );
-  }
-
-  Widget _buildViaBadge(String via) {
-    bool isWeb = via.toUpperCase() == 'WEB';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: isWeb ? const Color(0xFF1E293B) : Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(20),
+        color: color, 
+        borderRadius: BorderRadius.circular(20)
       ),
       child: Text(
-        via, 
-        style: TextStyle(
-          color: isWeb ? Colors.white : Colors.black87, 
+        process, 
+        style: const TextStyle(
+          color: Colors.white, 
           fontSize: 11, 
           fontWeight: FontWeight.bold
         )
@@ -177,21 +184,47 @@ class TransactionsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildViaBadge(BuildContext context, String via) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    bool isWeb = via.toUpperCase() == 'WEB';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isWeb 
+            ? (isDark ? UAGRMTheme.accentCyan.withValues(alpha: 0.1) : const Color(0xFF1E293B)) 
+            : (isDark ? Colors.white10 : Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(20),
+        border: isWeb && isDark ? Border.all(color: UAGRMTheme.accentCyan.withValues(alpha: 0.3)) : null,
+      ),
+      child: Text(
+        via, 
+        style: TextStyle(
+          color: isWeb ? (isDark ? UAGRMTheme.accentCyan : Colors.white) : (isDark ? Colors.white70 : Colors.black87), 
+          fontSize: 11, 
+          fontWeight: FontWeight.bold
+        )
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(BuildContext context, String status) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     bool isConfirmed = status.toUpperCase() == 'CONFIRMADA';
+    Color baseColor = isConfirmed ? const Color(0xFF22C55E) : Colors.orange;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.transparent,
-        border: Border.all(color: isConfirmed ? const Color(0xFF22C55E) : Colors.orange),
+        color: baseColor.withValues(alpha: 0.1),
+        border: Border.all(color: baseColor.withValues(alpha: 0.5)),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         isConfirmed ? 'Confirmado' : status,
         style: TextStyle(
-          color: isConfirmed ? const Color(0xFF15803D) : Colors.orange.shade800,
+          color: isDark ? baseColor : (isConfirmed ? const Color(0xFF15803D) : Colors.orange.shade800),
           fontSize: 11,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

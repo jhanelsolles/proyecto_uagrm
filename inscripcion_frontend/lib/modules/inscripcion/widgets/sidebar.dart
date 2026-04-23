@@ -18,10 +18,12 @@ class Sidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<RegistrationProvider>();
     
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       width: 250,
-      decoration: const BoxDecoration(
-        color: UAGRMTheme.primaryBlue,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF020C1B) : UAGRMTheme.primaryBlue,
         boxShadow: [
           BoxShadow(
             color: Colors.black26,

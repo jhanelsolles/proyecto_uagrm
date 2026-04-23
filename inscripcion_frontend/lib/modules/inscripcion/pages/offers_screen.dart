@@ -5,6 +5,7 @@ import 'package:inscripcion_frontend/config/theme/app_theme.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/widgets/main_layout.dart';
 import 'package:provider/provider.dart';
 import 'package:inscripcion_frontend/modules/inscripcion/services/registration_provider.dart';
+import 'package:inscripcion_frontend/shared/utils/responsive_helper.dart';
 
 class OffersScreen extends StatefulWidget {
   const OffersScreen({super.key});
@@ -63,7 +64,7 @@ class _OffersScreenState extends State<OffersScreen> {
           }).toList();
 
           return Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(Responsive.isMobile(context) ? 16 : 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -92,12 +93,16 @@ class _OffersScreenState extends State<OffersScreen> {
       children: [
         const Icon(Icons.grid_view_outlined, color: UAGRMTheme.primaryBlue, size: 28),
         const SizedBox(width: 12),
-        Text(
-          'Maestro de Ofertas - $careerName',
-          style: GoogleFonts.outfit(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: UAGRMTheme.textDark,
+        Expanded(
+          child: Text(
+            'Maestro de Ofertas - $careerName',
+            style: GoogleFonts.outfit(
+              fontSize: Responsive.isMobile(context) ? 18 : 20,
+              fontWeight: FontWeight.bold,
+              color: UAGRMTheme.textDark,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -105,19 +110,75 @@ class _OffersScreenState extends State<OffersScreen> {
   }
 
   Widget _buildFilters() {
+    final isMobile = Responsive.isMobile(context);
+    
+    if (isMobile) {
+      return Column(
+        children: [
+          TextField(
+            onChanged: (val) => setState(() => _searchQuery = val),
+            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+            decoration: InputDecoration(
+              hintText: 'Buscar por sigla o nombre...',
+              hintStyle: TextStyle(color: Theme.of(context).hintColor),
+              prefixIcon: Icon(Icons.search, size: 20, color: Theme.of(context).primaryColor),
+              filled: true,
+              fillColor: Theme.of(context).cardTheme.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<int?>(
+            initialValue: _selectedLevel,
+            dropdownColor: Theme.of(context).cardTheme.color,
+            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Theme.of(context).cardTheme.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).dividerColor)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1))),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            hint: Text('Nivel / Semestre', style: TextStyle(color: Theme.of(context).hintColor)),
+            items: [
+              DropdownMenuItem(value: null, child: Text('Todos los niveles', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color))),
+              ...List.generate(10, (index) => index + 1).map((lvl) => 
+                DropdownMenuItem(value: lvl, child: Text('Nivel $lvl', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)))
+              ),
+            ],
+            onChanged: (val) => setState(() => _selectedLevel = val),
+          ),
+        ],
+      );
+    }
+
     return Row(
       children: [
         Expanded(
           flex: 3,
           child: TextField(
             onChanged: (val) => setState(() => _searchQuery = val),
+            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
             decoration: InputDecoration(
               hintText: 'Buscar por sigla o nombre...',
-              prefixIcon: const Icon(Icons.search, size: 20),
-              fillColor: Colors.white,
+              hintStyle: TextStyle(color: Theme.of(context).hintColor),
+              prefixIcon: Icon(Icons.search, size: 20, color: Theme.of(context).primaryColor),
+              filled: true,
+              fillColor: Theme.of(context).cardTheme.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade200),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
               ),
             ),
           ),
@@ -127,15 +188,19 @@ class _OffersScreenState extends State<OffersScreen> {
           flex: 1,
           child: DropdownButtonFormField<int?>(
             initialValue: _selectedLevel,
+            dropdownColor: Theme.of(context).cardTheme.color,
+            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
             decoration: InputDecoration(
-              fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              filled: true,
+              fillColor: Theme.of(context).cardTheme.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).dividerColor)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1))),
             ),
-            hint: const Text('Nivel'),
+            hint: Text('Nivel', style: TextStyle(color: Theme.of(context).hintColor)),
             items: [
-              const DropdownMenuItem(value: null, child: Text('Todos los niveles')),
+              DropdownMenuItem(value: null, child: Text('Todos los niveles', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color))),
               ...List.generate(10, (index) => index + 1).map((lvl) => 
-                DropdownMenuItem(value: lvl, child: Text('Nivel $lvl'))
+                DropdownMenuItem(value: lvl, child: Text('Nivel $lvl', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)))
               ),
             ],
             onChanged: (val) => setState(() => _selectedLevel = val),
@@ -151,23 +216,25 @@ class _OffersScreenState extends State<OffersScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
+          scrollDirection: Axis.horizontal,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
             constraints: BoxConstraints(minWidth: constraints.maxWidth),
             child: DataTable(
-              headingRowColor: WidgetStateProperty.all(const Color(0xFFF8FAFC)),
+              headingRowColor: WidgetStateProperty.all(Theme.of(context).brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF8FAFC)),
               horizontalMargin: 12,
               columnSpacing: 20,
-              columns: const [
-                DataColumn(label: Text('Sigla')),
-                DataColumn(label: Text('Materia')),
-                DataColumn(label: Text('Nivel')),
-                DataColumn(label: Text('Grupo')),
-                DataColumn(label: Text('Turno')),
-                DataColumn(label: Text('Docente')),
-                DataColumn(label: Text('Horario')),
-                DataColumn(label: Text('Cupos')),
-                DataColumn(label: Text('Inscritos')),
+              columns: [
+                DataColumn(label: Text('Sigla', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleSmall?.color))),
+                DataColumn(label: Text('Materia', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleSmall?.color))),
+                DataColumn(label: Text('Nivel', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleSmall?.color))),
+                DataColumn(label: Text('Grupo', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleSmall?.color))),
+                DataColumn(label: Text('Turno', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleSmall?.color))),
+                DataColumn(label: Text('Docente', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleSmall?.color))),
+                DataColumn(label: Text('Horario', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleSmall?.color))),
+                DataColumn(label: Text('Cupos', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleSmall?.color))),
+                DataColumn(label: Text('Inscritos', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleSmall?.color))),
               ],
               rows: offers.map<DataRow>((o) {
                 return DataRow(cells: [
@@ -190,10 +257,11 @@ class _OffersScreenState extends State<OffersScreen> {
               }).toList(),
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildCircleBadge(String text) {
     return Container(

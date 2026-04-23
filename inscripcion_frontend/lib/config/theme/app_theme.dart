@@ -23,8 +23,6 @@ class UAGRMTheme {
       error: errorRed,
     ),
     scaffoldBackgroundColor: backgroundWhite,
-    
-    // Tipografía
     textTheme: TextTheme(
       displayLarge: GoogleFonts.inter(
         fontSize: 24,
@@ -133,11 +131,13 @@ class UAGRMTheme {
     ),
   );
 
-  static const Color darkBackground = Color(0xFF121212);
-  static const Color darkSurface = Color(0xFF1E1E1E);
-  static const Color darkCard = Color(0xFF252525);
-  static const Color darkText = Color(0xFFECECEC);
-  static const Color darkTextSecondary = Color(0xFFAAAAAA);
+  static const Color darkBackground = Color(0xFF030B17); // Más profundo
+  static const Color darkSurface = Color(0xFF0A192F);    // Superficie navy
+  static const Color darkCard = Color(0xFF112240);       // Tarjetas navy
+  static const Color darkText = Color(0xFFF1F5F9);       // Texto claro puro
+  static const Color darkTextSecondary = Color(0xFF94A3B8); // Texto secundario gris azulado
+  static const Color accentCyan = Color(0xFF00FFF2);     // Cian vibrante para acentos
+  static const Color accentBlue = Color(0xFF38BDF8);     // Azul eléctrico
 
   static final ThemeData darkThemeData = ThemeData(
     useMaterial3: true,
@@ -152,12 +152,12 @@ class UAGRMTheme {
     scaffoldBackgroundColor: darkBackground,
 
     textTheme: TextTheme(
-      displayLarge: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, color: darkText),
-      displayMedium: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold, color: darkText),
-      titleLarge: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: darkText),
-      bodyLarge: GoogleFonts.roboto(fontSize: 16, color: darkText),
-      bodyMedium: GoogleFonts.roboto(fontSize: 14, color: darkTextSecondary),
-      labelLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+      displayLarge: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: darkText),
+      displayMedium: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: darkText),
+      titleLarge: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: darkText),
+      bodyLarge: GoogleFonts.inter(fontSize: 16, color: darkText),
+      bodyMedium: GoogleFonts.inter(fontSize: 14, color: darkTextSecondary),
+      labelLarge: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
     ),
 
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -191,13 +191,16 @@ class UAGRMTheme {
 
     cardTheme: CardThemeData(
       color: darkCard,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 1),
+      ),
       margin: EdgeInsets.zero,
     ),
 
     appBarTheme: AppBarTheme(
-      backgroundColor: const Color(0xFF0D1B2A),
+      backgroundColor: const Color(0xFF020C1B),
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
